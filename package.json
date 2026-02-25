@@ -1,0 +1,166 @@
+{
+  "name": "convert-md-to-pdf",
+  "displayName": "Convert Markdown to PDF",
+  "description": "Export Markdown files to PDF with custom styling and live preview",
+  "version": "0.1.0",
+  "publisher": "tiveor",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tiveor/convert-md-to-pdf"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Formatters"
+  ],
+  "keywords": [
+    "markdown",
+    "pdf",
+    "export",
+    "convert",
+    "preview"
+  ],
+  "activationEvents": [
+    "onLanguage:markdown"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "convert-md-to-pdf.export",
+        "title": "Export Markdown to PDF",
+        "icon": "$(file-pdf)"
+      },
+      {
+        "command": "convert-md-to-pdf.preview",
+        "title": "Open PDF Preview",
+        "icon": "$(open-preview)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "convert-md-to-pdf.preview",
+          "when": "editorLangId == markdown",
+          "group": "navigation"
+        },
+        {
+          "command": "convert-md-to-pdf.export",
+          "when": "editorLangId == markdown",
+          "group": "navigation"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "convert-md-to-pdf.export",
+          "when": "editorLangId == markdown",
+          "group": "export"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "convert-md-to-pdf.export",
+          "when": "resourceExtname == .md",
+          "group": "export"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Convert Markdown to PDF",
+      "properties": {
+        "convertMdToPdf.chromePath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to Chrome/Chromium executable. Leave empty for auto-detection."
+        },
+        "convertMdToPdf.pageSize": {
+          "type": "string",
+          "default": "A4",
+          "enum": [
+            "A4",
+            "Letter",
+            "Legal",
+            "Tabloid"
+          ],
+          "description": "PDF page size."
+        },
+        "convertMdToPdf.margins": {
+          "type": "object",
+          "default": {
+            "top": "20mm",
+            "bottom": "20mm",
+            "left": "15mm",
+            "right": "15mm"
+          },
+          "description": "PDF page margins.",
+          "properties": {
+            "top": {
+              "type": "string",
+              "default": "20mm"
+            },
+            "bottom": {
+              "type": "string",
+              "default": "20mm"
+            },
+            "left": {
+              "type": "string",
+              "default": "15mm"
+            },
+            "right": {
+              "type": "string",
+              "default": "15mm"
+            }
+          }
+        },
+        "convertMdToPdf.fontSize": {
+          "type": "number",
+          "default": 14,
+          "description": "Base font size in pixels."
+        },
+        "convertMdToPdf.customCssPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to a custom CSS file to style the PDF output."
+        },
+        "convertMdToPdf.headerTemplate": {
+          "type": "string",
+          "default": "",
+          "description": "HTML template for PDF page header. Supports Puppeteer template classes."
+        },
+        "convertMdToPdf.footerTemplate": {
+          "type": "string",
+          "default": "<div style=\"font-size:10px;text-align:center;width:100%\"><span class=\"pageNumber\"></span> / <span class=\"totalPages\"></span></div>",
+          "description": "HTML template for PDF page footer. Supports Puppeteer template classes."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "dev": "node esbuild.mjs --watch",
+    "build": "node esbuild.mjs --production",
+    "package": "pnpm build && vsce package --no-dependencies",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "highlight.js": "^11.9.0",
+    "markdown-it": "^14.1.0",
+    "puppeteer-core": "^22.6.0"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.1.1",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^2.24.0",
+    "esbuild": "^0.20.2",
+    "typescript": "^5.4.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "@vscode/vsce-sign",
+      "keytar"
+    ]
+  }
+}
