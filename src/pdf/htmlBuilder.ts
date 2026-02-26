@@ -4,20 +4,25 @@ import * as fs from "fs";
 import defaultCss from "../styles/default.css";
 import type { PdfSettings } from "../config/settings";
 
-const md = new MarkdownIt({
+function highlight(str: string, lang: string): string {
+  if (lang === "mermaid") {
+    return `<pre class="mermaid">${MarkdownIt().utils.escapeHtml(str)}</pre>`;
+  }
+  if (lang && hljs.getLanguage(lang)) {
+    try {
+      return `<pre class="hljs"><code>${hljs.highlight(str, { language: lang }).value}</code></pre>`;
+    } catch {
+      // fall through
+    }
+  }
+  return `<pre class="hljs"><code>${MarkdownIt().utils.escapeHtml(str)}</code></pre>`;
+}
+
+const md: MarkdownIt = new MarkdownIt({
   html: true,
   linkify: true,
   typographer: true,
-  highlight(str, lang) {
-    if (lang && hljs.getLanguage(lang)) {
-      try {
-        return `<pre class="hljs"><code>${hljs.highlight(str, { language: lang }).value}</code></pre>`;
-      } catch {
-        // fall through
-      }
-    }
-    return `<pre class="hljs"><code>${md.utils.escapeHtml(str)}</code></pre>`;
-  },
+  highlight,
 });
 
 export function buildHtml(markdown: string, settings: PdfSettings, customCss?: string): string {

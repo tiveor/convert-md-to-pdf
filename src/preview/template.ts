@@ -9,7 +9,7 @@ export function getPreviewHtml(
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${cspSource} 'nonce-${nonce}'; img-src ${cspSource} https: data:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${cspSource} 'nonce-${nonce}' 'unsafe-inline'; script-src 'nonce-${nonce}' https://cdn.jsdelivr.net; img-src ${cspSource} https: data:;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style nonce="${nonce}">
     body {
@@ -54,6 +54,11 @@ export function getPreviewHtml(
 </head>
 <body>
   ${bodyHtml}
+  <script nonce="${nonce}" type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: false, theme: 'default' });
+    await mermaid.run();
+  </script>
 </body>
 </html>`;
 }

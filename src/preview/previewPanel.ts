@@ -3,20 +3,25 @@ import MarkdownIt from "markdown-it";
 import hljs from "highlight.js";
 import { getPreviewHtml, getNonce } from "./template";
 
-const md = new MarkdownIt({
+function highlight(str: string, lang: string): string {
+  if (lang === "mermaid") {
+    return `<pre class="mermaid">${MarkdownIt().utils.escapeHtml(str)}</pre>`;
+  }
+  if (lang && hljs.getLanguage(lang)) {
+    try {
+      return `<pre class="hljs"><code>${hljs.highlight(str, { language: lang }).value}</code></pre>`;
+    } catch {
+      // fall through
+    }
+  }
+  return `<pre class="hljs"><code>${MarkdownIt().utils.escapeHtml(str)}</code></pre>`;
+}
+
+const md: MarkdownIt = new MarkdownIt({
   html: true,
   linkify: true,
   typographer: true,
-  highlight(str, lang) {
-    if (lang && hljs.getLanguage(lang)) {
-      try {
-        return `<pre class="hljs"><code>${hljs.highlight(str, { language: lang }).value}</code></pre>`;
-      } catch {
-        // fall through
-      }
-    }
-    return `<pre class="hljs"><code>${md.utils.escapeHtml(str)}</code></pre>`;
-  },
+  highlight,
 });
 
 export class PreviewPanel {
@@ -62,7 +67,7 @@ export class PreviewPanel {
       "mdPdfPreview",
       "PDF Preview",
       vscode.ViewColumn.Beside,
-      { enableScripts: false }
+      { enableScripts: true }
     );
 
     PreviewPanel.instance = new PreviewPanel(panel);

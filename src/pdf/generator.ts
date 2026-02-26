@@ -1,6 +1,11 @@
 import puppeteer from "puppeteer-core";
+import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
 import type { PdfSettings } from "../config/settings";
 import { findChrome } from "./chromeFinder";
+
+const MERMAID_CDN = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js";
 
 const PAGE_SIZES: Record<string, { width: number; height: number }> = {
   A4: { width: 8.27, height: 11.69 },
@@ -22,6 +27,10 @@ export async function generatePdf(
     );
   }
 
+  // Write HTML to a temp file so page.goto() can load external scripts
+  const tmpFile = path.join(os.tmpdir(), `md-pdf-${Date.now()}.html`);
+  fs.writeFileSync(tmpFile, html);
+
   const browser = await puppeteer.launch({
     executablePath,
     headless: true,
@@ -30,7 +39,18 @@ export async function generatePdf(
 
   try {
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.goto(`file://${tmpFile}`, { waitUntil: "networkidle0" });
+
+    // Render mermaid diagrams if any exist
+    const hasMermaid = await page.evaluate(() => document.querySelectorAll(".mermaid").length > 0);
+    if (hasMermaid) {
+      await page.addScriptTag({ url: MERMAID_CDN });
+      await page.evaluate(async () => {
+        const m = (window as any).mermaid;
+        m.initialize({ startOnLoad: false, theme: "default" });
+        await m.run();
+      });
+    }
 
     const size = PAGE_SIZES[settings.pageSize] || PAGE_SIZES.A4;
     const hasHeaderOrFooter = !!(settings.headerTemplate || settings.footerTemplate);
@@ -47,5 +67,6 @@ export async function generatePdf(
     });
   } finally {
     await browser.close();
+    try { fs.unlinkSync(tmpFile); } catch {}
   }
 }

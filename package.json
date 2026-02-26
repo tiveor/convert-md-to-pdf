@@ -2,8 +2,9 @@
   "name": "convert-md-to-pdf",
   "displayName": "Convert Markdown to PDF",
   "description": "Export Markdown files to PDF with custom styling and live preview",
-  "version": "0.1.0",
-  "publisher": "tiveor",
+  "version": "0.2.0",
+  "publisher": "alvarotech",
+  "icon": "media/icon.png",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -55,12 +56,22 @@
       ],
       "editor/context": [
         {
+          "command": "convert-md-to-pdf.preview",
+          "when": "editorLangId == markdown",
+          "group": "export"
+        },
+        {
           "command": "convert-md-to-pdf.export",
           "when": "editorLangId == markdown",
           "group": "export"
         }
       ],
       "explorer/context": [
+        {
+          "command": "convert-md-to-pdf.preview",
+          "when": "resourceExtname == .md",
+          "group": "export"
+        },
         {
           "command": "convert-md-to-pdf.export",
           "when": "resourceExtname == .md",

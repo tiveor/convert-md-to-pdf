@@ -1,8 +1,14 @@
 .vscode/
+.claude/
 src/
 node_modules/
+plans/
+tests/
 .gitignore
+.DS_Store
 tsconfig.json
 esbuild.mjs
+pnpm-lock.yaml
 PLAN.md
+QUICKSTART.md
 *.map
