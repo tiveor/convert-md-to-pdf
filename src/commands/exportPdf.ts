@@ -1,9 +1,33 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
-import { getSettings } from "../config/settings";
+import { getSettings, type MermaidScale } from "../config/settings";
 import { buildHtml } from "../pdf/htmlBuilder";
 import { generatePdf } from "../pdf/generator";
+
+const MERMAID_SCALE_VALUES: Record<string, number> = {
+  small: 65,
+  medium: 80,
+  large: 100,
+};
+
+async function askMermaidScale(): Promise<number | undefined> {
+  const pick = await vscode.window.showQuickPick(
+    [
+      { label: "Small", description: "65%", value: 65 },
+      { label: "Medium (Recommended)", description: "80%", value: 80 },
+      { label: "Large", description: "100% (full size)", value: 100 },
+    ],
+    {
+      placeHolder: "Mermaid diagrams detected — choose diagram size",
+    }
+  );
+  return pick?.value;
+}
+
+function hasMermaidBlocks(markdown: string): boolean {
+  return /```mermaid/i.test(markdown);
+}
 
 export async function exportPdf(uri?: vscode.Uri): Promise<void> {
   let document: vscode.TextDocument;
@@ -39,6 +63,20 @@ export async function exportPdf(uri?: vscode.Uri): Promise<void> {
     }
   }
 
+  // Detect mermaid diagrams and resolve scale
+  let mermaidWidthPercent: number | undefined;
+  if (hasMermaidBlocks(markdown)) {
+    if (settings.mermaidScale === "ask") {
+      const chosen = await askMermaidScale();
+      if (chosen === undefined) {
+        return; // user cancelled
+      }
+      mermaidWidthPercent = chosen;
+    } else {
+      mermaidWidthPercent = MERMAID_SCALE_VALUES[settings.mermaidScale] ?? 100;
+    }
+  }
+
   const html = buildHtml(markdown, settings, customCss);
 
   const mdPath = document.uri.fsPath;
@@ -61,7 +99,7 @@ export async function exportPdf(uri?: vscode.Uri): Promise<void> {
     },
     async () => {
       try {
-        await generatePdf(html, outputUri.fsPath, settings);
+        await generatePdf(html, outputUri.fsPath, settings, mermaidWidthPercent);
 
         const action = await vscode.window.showInformationMessage(
           `PDF saved: ${path.basename(outputUri.fsPath)}`,

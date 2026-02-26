@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 
+export type MermaidScale = "small" | "medium" | "large" | "ask";
+
 export interface PdfSettings {
   chromePath: string;
   pageSize: "A4" | "Letter" | "Legal" | "Tabloid";
@@ -13,6 +15,7 @@ export interface PdfSettings {
   customCssPath: string;
   headerTemplate: string;
   footerTemplate: string;
+  mermaidScale: MermaidScale;
 }
 
 export function getSettings(): PdfSettings {
@@ -34,5 +37,6 @@ export function getSettings(): PdfSettings {
       "footerTemplate",
       '<div style="font-size:10px;text-align:center;width:100%"><span class="pageNumber"></span> / <span class="totalPages"></span></div>'
     ),
+    mermaidScale: config.get<MermaidScale>("mermaidScale", "ask"),
   };
 }

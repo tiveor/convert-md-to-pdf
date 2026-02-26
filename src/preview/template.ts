@@ -3,7 +3,8 @@ import type * as vscode from "vscode";
 export function getPreviewHtml(
   bodyHtml: string,
   cspSource: string,
-  nonce: string
+  nonce: string,
+  mermaidWidthPercent: number = 100
 ): string {
   return `<!DOCTYPE html>
 <html>
@@ -58,6 +59,21 @@ export function getPreviewHtml(
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
     mermaid.initialize({ startOnLoad: false, theme: 'default' });
     await mermaid.run();
+    ${mermaidWidthPercent < 100 ? `
+    const scale = ${mermaidWidthPercent} / 100;
+    document.querySelectorAll('.mermaid svg').forEach((svg) => {
+      const { width, height } = svg.getBoundingClientRect();
+      svg.style.transform = 'scale(' + scale + ')';
+      svg.style.transformOrigin = 'top left';
+      const container = svg.closest('.mermaid');
+      if (container) {
+        container.style.width = (width * scale) + 'px';
+        container.style.height = (height * scale) + 'px';
+        container.style.overflow = 'hidden';
+        container.style.padding = '0';
+        container.style.background = 'none';
+      }
+    });` : ""}
   </script>
 </body>
 </html>`;

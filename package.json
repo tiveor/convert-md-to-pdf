@@ -2,7 +2,7 @@
   "name": "convert-md-to-pdf",
   "displayName": "Convert Markdown to PDF",
   "description": "Export Markdown files to PDF with custom styling and live preview",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "alvarotech",
   "icon": "media/icon.png",
   "license": "MIT",
@@ -135,6 +135,23 @@
           "type": "string",
           "default": "",
           "description": "Path to a custom CSS file to style the PDF output."
+        },
+        "convertMdToPdf.mermaidScale": {
+          "type": "string",
+          "default": "ask",
+          "enum": [
+            "ask",
+            "small",
+            "medium",
+            "large"
+          ],
+          "enumDescriptions": [
+            "Ask for diagram size when exporting (if Mermaid diagrams are detected)",
+            "Small diagrams (65%)",
+            "Medium diagrams (80%)",
+            "Large diagrams (100%, full size)"
+          ],
+          "description": "Controls the size of Mermaid diagrams in the PDF. Set to 'ask' to be prompted each time."
         },
         "convertMdToPdf.headerTemplate": {
           "type": "string",

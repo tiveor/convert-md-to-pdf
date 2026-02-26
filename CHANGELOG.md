@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.1] - 2026-02-26
+
+### Added
+
+- Mermaid diagram size control: choose Small (65%), Medium (80%), or Large (100%) when exporting
+- New `convertMdToPdf.mermaidScale` setting with options: `ask`, `small`, `medium`, `large`
+- Auto-detection of Mermaid diagrams prompts a size picker before PDF export
+- Proportional scaling applied to both width and height of all diagram types
+
 ## [0.2.0] - 2026-02-26
 
 ### Added

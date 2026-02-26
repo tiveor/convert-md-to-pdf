@@ -2,6 +2,13 @@ import * as vscode from "vscode";
 import MarkdownIt from "markdown-it";
 import hljs from "highlight.js";
 import { getPreviewHtml, getNonce } from "./template";
+import { getSettings } from "../config/settings";
+
+const MERMAID_SCALE_VALUES: Record<string, number> = {
+  small: 65,
+  medium: 80,
+  large: 100,
+};
 
 function highlight(str: string, lang: string): string {
   if (lang === "mermaid") {
@@ -87,7 +94,10 @@ export class PreviewPanel {
     const nonce = getNonce();
     const cspSource = this.panel.webview.cspSource;
 
-    this.panel.webview.html = getPreviewHtml(bodyHtml, cspSource, nonce);
+    const settings = getSettings();
+    const scale = settings.mermaidScale === "ask" ? 80 : (MERMAID_SCALE_VALUES[settings.mermaidScale] ?? 100);
+
+    this.panel.webview.html = getPreviewHtml(bodyHtml, cspSource, nonce, scale);
   }
 
   private dispose(): void {

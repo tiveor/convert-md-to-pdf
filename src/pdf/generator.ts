@@ -17,7 +17,8 @@ const PAGE_SIZES: Record<string, { width: number; height: number }> = {
 export async function generatePdf(
   html: string,
   outputPath: string,
-  settings: PdfSettings
+  settings: PdfSettings,
+  mermaidWidthPercent?: number
 ): Promise<void> {
   const executablePath = settings.chromePath || findChrome();
 
@@ -50,6 +51,26 @@ export async function generatePdf(
         m.initialize({ startOnLoad: false, theme: "default" });
         await m.run();
       });
+
+      // Scale diagrams proportionally (both width and height) using CSS transform
+      if (mermaidWidthPercent && mermaidWidthPercent < 100) {
+        await page.evaluate((widthPct: number) => {
+          const scale = widthPct / 100;
+          document.querySelectorAll<SVGSVGElement>(".mermaid svg").forEach((svg) => {
+            const { width, height } = svg.getBoundingClientRect();
+            svg.style.transform = `scale(${scale})`;
+            svg.style.transformOrigin = "top left";
+            const container = svg.closest(".mermaid") as HTMLElement | null;
+            if (container) {
+              container.style.width = `${width * scale}px`;
+              container.style.height = `${height * scale}px`;
+              container.style.overflow = "hidden";
+              container.style.padding = "0";
+              container.style.background = "none";
+            }
+          });
+        }, mermaidWidthPercent);
+      }
     }
 
     const size = PAGE_SIZES[settings.pageSize] || PAGE_SIZES.A4;
