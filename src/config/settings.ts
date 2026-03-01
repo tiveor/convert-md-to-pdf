@@ -1,10 +1,11 @@
 import * as vscode from "vscode";
 
-export type MermaidScale = "small" | "medium" | "large" | "ask";
+export type PageOrientation = "auto" | "portrait" | "landscape";
 
 export interface PdfSettings {
   chromePath: string;
   pageSize: "A4" | "Letter" | "Legal" | "Tabloid";
+  orientation: PageOrientation;
   margins: {
     top: string;
     bottom: string;
@@ -15,7 +16,6 @@ export interface PdfSettings {
   customCssPath: string;
   headerTemplate: string;
   footerTemplate: string;
-  mermaidScale: MermaidScale;
 }
 
 export function getSettings(): PdfSettings {
@@ -24,6 +24,7 @@ export function getSettings(): PdfSettings {
   return {
     chromePath: config.get<string>("chromePath", ""),
     pageSize: config.get<PdfSettings["pageSize"]>("pageSize", "A4"),
+    orientation: config.get<PageOrientation>("orientation", "auto"),
     margins: config.get<PdfSettings["margins"]>("margins", {
       top: "20mm",
       bottom: "20mm",
@@ -37,6 +38,5 @@ export function getSettings(): PdfSettings {
       "footerTemplate",
       '<div style="font-size:10px;text-align:center;width:100%"><span class="pageNumber"></span> / <span class="totalPages"></span></div>'
     ),
-    mermaidScale: config.get<MermaidScale>("mermaidScale", "ask"),
   };
 }

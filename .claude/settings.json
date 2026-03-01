@@ -1,7 +1,22 @@
 {
   "permissions": {
     "allow": [
-      "Bash(code --version)"
+      "Bash(code --version)",
+      "Bash(npx vsce --version)",
+      "Bash(npx vsce publish --no-dependencies)",
+      "Bash(cat:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:deepwiki.com)",
+      "WebFetch(domain:cdn.jsdelivr.net)",
+      "Bash(pnpm package)",
+      "Bash(vsce publish --no-dependencies)",
+      "Bash(npx @vscode/vsce publish --no-dependencies)",
+      "Bash(code --install-extension /Users/alvarotech/dev/convert-md-to-pdf/convert-md-to-pdf-0.2.0.vsix)",
+      "Bash(code --install-extension /Users/alvarotech/dev/convert-md-to-pdf/convert-md-to-pdf-0.2.0.vsix --force)",
+      "Bash(code --install-extension /Users/alvarotech/dev/convert-md-to-pdf/convert-md-to-pdf-0.2.1.vsix --force)"
+    ],
+    "additionalDirectories": [
+      "/Users/alvarotech/dev/convert-md-to-pdf"
     ]
   }
 }

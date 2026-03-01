@@ -4,9 +4,13 @@ import * as fs from "fs";
 import defaultCss from "../styles/default.css";
 import type { PdfSettings } from "../config/settings";
 
+function stripFrontmatter(markdown: string): string {
+  return markdown.replace(/^---\n[\s\S]*?\n---\n?/, "");
+}
+
 function highlight(str: string, lang: string): string {
   if (lang === "mermaid") {
-    return `<pre class="mermaid">${MarkdownIt().utils.escapeHtml(str)}</pre>`;
+    return `<pre class="mermaid">${str}</pre>`;
   }
   if (lang && hljs.getLanguage(lang)) {
     try {
@@ -26,7 +30,7 @@ const md: MarkdownIt = new MarkdownIt({
 });
 
 export function buildHtml(markdown: string, settings: PdfSettings, customCss?: string): string {
-  const body = md.render(markdown);
+  const body = md.render(stripFrontmatter(markdown));
 
   return `<!DOCTYPE html>
 <html>

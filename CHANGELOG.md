@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.2] - 2026-03-01
+
+### Changed
+
+- Replaced Mermaid diagram size picker with a **page orientation** picker (Auto, Portrait, Landscape)
+- `convertMdToPdf.orientation` setting replaces `convertMdToPdf.mermaidScale`
+- **Auto** mode renders Mermaid diagrams at full content width and fits them to the page without blank pages
+- Improved PDF generator: viewport matches page content width so diagrams render at maximum readable size
+
+### Removed
+
+- `convertMdToPdf.mermaidScale` setting (replaced by `orientation`)
+
 ## [0.2.1] - 2026-02-26
 
 ### Added

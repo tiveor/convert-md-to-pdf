@@ -1,32 +1,26 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
-import { getSettings, type MermaidScale } from "../config/settings";
+import { getSettings, type PageOrientation } from "../config/settings";
 import { buildHtml } from "../pdf/htmlBuilder";
 import { generatePdf } from "../pdf/generator";
 
-const MERMAID_SCALE_VALUES: Record<string, number> = {
-  small: 65,
-  medium: 80,
-  large: 100,
-};
+function hasMermaidBlocks(markdown: string): boolean {
+  return /```mermaid/i.test(markdown);
+}
 
-async function askMermaidScale(): Promise<number | undefined> {
+async function askOrientation(): Promise<PageOrientation | undefined> {
   const pick = await vscode.window.showQuickPick(
     [
-      { label: "Small", description: "65%", value: 65 },
-      { label: "Medium (Recommended)", description: "80%", value: 80 },
-      { label: "Large", description: "100% (full size)", value: 100 },
+      { label: "Auto (Recommended)", description: "Wide diagrams get landscape pages, rest stays portrait", value: "auto" as PageOrientation },
+      { label: "Portrait", description: "All pages vertical", value: "portrait" as PageOrientation },
+      { label: "Landscape", description: "All pages horizontal", value: "landscape" as PageOrientation },
     ],
     {
-      placeHolder: "Mermaid diagrams detected — choose diagram size",
+      placeHolder: "Mermaid diagrams detected — choose page orientation",
     }
   );
   return pick?.value;
-}
-
-function hasMermaidBlocks(markdown: string): boolean {
-  return /```mermaid/i.test(markdown);
 }
 
 export async function exportPdf(uri?: vscode.Uri): Promise<void> {
@@ -63,18 +57,13 @@ export async function exportPdf(uri?: vscode.Uri): Promise<void> {
     }
   }
 
-  // Detect mermaid diagrams and resolve scale
-  let mermaidWidthPercent: number | undefined;
+  // Ask for orientation when mermaid diagrams are detected
   if (hasMermaidBlocks(markdown)) {
-    if (settings.mermaidScale === "ask") {
-      const chosen = await askMermaidScale();
-      if (chosen === undefined) {
-        return; // user cancelled
-      }
-      mermaidWidthPercent = chosen;
-    } else {
-      mermaidWidthPercent = MERMAID_SCALE_VALUES[settings.mermaidScale] ?? 100;
+    const chosen = await askOrientation();
+    if (chosen === undefined) {
+      return; // user cancelled
     }
+    settings.orientation = chosen;
   }
 
   const html = buildHtml(markdown, settings, customCss);
@@ -99,7 +88,7 @@ export async function exportPdf(uri?: vscode.Uri): Promise<void> {
     },
     async () => {
       try {
-        await generatePdf(html, outputUri.fsPath, settings, mermaidWidthPercent);
+        await generatePdf(html, outputUri.fsPath, settings);
 
         const action = await vscode.window.showInformationMessage(
           `PDF saved: ${path.basename(outputUri.fsPath)}`,

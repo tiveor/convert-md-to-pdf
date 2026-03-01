@@ -6,6 +6,8 @@ A VS Code extension that exports Markdown files to high-quality PDFs using Chrom
 
 - **Export to PDF** — Convert any `.md` file to PDF via command palette or right-click menu
 - **Live Preview** — Side-by-side preview panel that updates as you type
+- **Mermaid Diagrams** — Renders flowcharts, sequence diagrams, and all Mermaid diagram types
+- **Page Orientation** — Auto, Portrait, or Landscape (auto fits wide diagrams to the page)
 - **Custom Styling** — Apply your own CSS themes to the PDF output
 - **Configurable** — Page size, margins, font size, headers, and footers
 
@@ -32,6 +34,7 @@ Click the eye icon in the editor title bar, or run **"Open PDF Preview"** from t
 |---|---|---|
 | `convertMdToPdf.chromePath` | Auto-detect | Path to Chrome/Chromium executable |
 | `convertMdToPdf.pageSize` | `A4` | Page size: A4, Letter, Legal, Tabloid |
+| `convertMdToPdf.orientation` | `auto` | Page orientation: `auto`, `portrait`, `landscape` |
 | `convertMdToPdf.margins` | `20mm / 15mm` | Top, bottom, left, right margins |
 | `convertMdToPdf.fontSize` | `14` | Base font size in pixels |
 | `convertMdToPdf.customCssPath` | — | Path to a custom CSS file |

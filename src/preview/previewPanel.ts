@@ -2,17 +2,14 @@ import * as vscode from "vscode";
 import MarkdownIt from "markdown-it";
 import hljs from "highlight.js";
 import { getPreviewHtml, getNonce } from "./template";
-import { getSettings } from "../config/settings";
 
-const MERMAID_SCALE_VALUES: Record<string, number> = {
-  small: 65,
-  medium: 80,
-  large: 100,
-};
+function stripFrontmatter(markdown: string): string {
+  return markdown.replace(/^---\n[\s\S]*?\n---\n?/, "");
+}
 
 function highlight(str: string, lang: string): string {
   if (lang === "mermaid") {
-    return `<pre class="mermaid">${MarkdownIt().utils.escapeHtml(str)}</pre>`;
+    return `<pre class="mermaid">${str}</pre>`;
   }
   if (lang && hljs.getLanguage(lang)) {
     try {
@@ -90,14 +87,11 @@ export class PreviewPanel {
 
   private update(document: vscode.TextDocument): void {
     const markdown = document.getText();
-    const bodyHtml = md.render(markdown);
+    const bodyHtml = md.render(stripFrontmatter(markdown));
     const nonce = getNonce();
     const cspSource = this.panel.webview.cspSource;
 
-    const settings = getSettings();
-    const scale = settings.mermaidScale === "ask" ? 80 : (MERMAID_SCALE_VALUES[settings.mermaidScale] ?? 100);
-
-    this.panel.webview.html = getPreviewHtml(bodyHtml, cspSource, nonce, scale);
+    this.panel.webview.html = getPreviewHtml(bodyHtml, cspSource, nonce);
   }
 
   private dispose(): void {

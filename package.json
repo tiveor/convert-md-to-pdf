@@ -2,7 +2,7 @@
   "name": "convert-md-to-pdf",
   "displayName": "Convert Markdown to PDF",
   "description": "Export Markdown files to PDF with custom styling and live preview",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "publisher": "alvarotech",
   "icon": "media/icon.png",
   "license": "MIT",
@@ -136,22 +136,20 @@
           "default": "",
           "description": "Path to a custom CSS file to style the PDF output."
         },
-        "convertMdToPdf.mermaidScale": {
+        "convertMdToPdf.orientation": {
           "type": "string",
-          "default": "ask",
+          "default": "auto",
           "enum": [
-            "ask",
-            "small",
-            "medium",
-            "large"
+            "auto",
+            "portrait",
+            "landscape"
           ],
           "enumDescriptions": [
-            "Ask for diagram size when exporting (if Mermaid diagrams are detected)",
-            "Small diagrams (65%)",
-            "Medium diagrams (80%)",
-            "Large diagrams (100%, full size)"
+            "Auto-detect: wide diagrams get landscape pages, rest stays portrait",
+            "All pages in portrait (vertical) orientation",
+            "All pages in landscape (horizontal) orientation"
           ],
-          "description": "Controls the size of Mermaid diagrams in the PDF. Set to 'ask' to be prompted each time."
+          "description": "Page orientation for PDF export. 'auto' mixes portrait and landscape per diagram width."
         },
         "convertMdToPdf.headerTemplate": {
           "type": "string",

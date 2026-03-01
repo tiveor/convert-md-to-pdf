@@ -3,8 +3,7 @@ import type * as vscode from "vscode";
 export function getPreviewHtml(
   bodyHtml: string,
   cspSource: string,
-  nonce: string,
-  mermaidWidthPercent: number = 100
+  nonce: string
 ): string {
   return `<!DOCTYPE html>
 <html>
@@ -51,6 +50,7 @@ export function getPreviewHtml(
     th { font-weight: 600; }
     img { max-width: 100%; height: auto; }
     hr { border: none; border-top: 2px solid var(--vscode-panel-border); margin: 2em 0; }
+    .mermaid svg { max-width: 100%; height: auto; }
   </style>
 </head>
 <body>
@@ -58,22 +58,14 @@ export function getPreviewHtml(
   <script nonce="${nonce}" type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
     mermaid.initialize({ startOnLoad: false, theme: 'default' });
-    await mermaid.run();
-    ${mermaidWidthPercent < 100 ? `
-    const scale = ${mermaidWidthPercent} / 100;
-    document.querySelectorAll('.mermaid svg').forEach((svg) => {
-      const { width, height } = svg.getBoundingClientRect();
-      svg.style.transform = 'scale(' + scale + ')';
-      svg.style.transformOrigin = 'top left';
-      const container = svg.closest('.mermaid');
-      if (container) {
-        container.style.width = (width * scale) + 'px';
-        container.style.height = (height * scale) + 'px';
-        container.style.overflow = 'hidden';
-        container.style.padding = '0';
-        container.style.background = 'none';
+    const nodes = document.querySelectorAll('.mermaid');
+    for (const node of nodes) {
+      try {
+        await mermaid.run({ nodes: [node] });
+      } catch (e) {
+        node.innerHTML = '<pre style="color:#c00;font-size:12px;">Mermaid render error: ' + e.message + '</pre>';
       }
-    });` : ""}
+    }
   </script>
 </body>
 </html>`;
