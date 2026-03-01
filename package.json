@@ -2,7 +2,7 @@
   "name": "convert-md-to-pdf",
   "displayName": "Convert Markdown to PDF",
   "description": "Export Markdown files to PDF with custom styling and live preview",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "publisher": "alvarotech",
   "icon": "media/icon.png",
   "license": "MIT",
@@ -39,6 +39,11 @@
         "command": "convert-md-to-pdf.preview",
         "title": "Open PDF Preview",
         "icon": "$(open-preview)"
+      },
+      {
+        "command": "convert-md-to-pdf.exportPresentation",
+        "title": "Export Markdown to Presentation PDF",
+        "icon": "$(file-pdf)"
       }
     ],
     "menus": {
@@ -58,24 +63,34 @@
         {
           "command": "convert-md-to-pdf.preview",
           "when": "editorLangId == markdown",
-          "group": "export"
+          "group": "export@1"
         },
         {
           "command": "convert-md-to-pdf.export",
           "when": "editorLangId == markdown",
-          "group": "export"
+          "group": "export@2"
+        },
+        {
+          "command": "convert-md-to-pdf.exportPresentation",
+          "when": "editorLangId == markdown",
+          "group": "export@3"
         }
       ],
       "explorer/context": [
         {
           "command": "convert-md-to-pdf.preview",
           "when": "resourceExtname == .md",
-          "group": "export"
+          "group": "export@1"
         },
         {
           "command": "convert-md-to-pdf.export",
           "when": "resourceExtname == .md",
-          "group": "export"
+          "group": "export@2"
+        },
+        {
+          "command": "convert-md-to-pdf.exportPresentation",
+          "when": "resourceExtname == .md",
+          "group": "export@3"
         }
       ]
     },

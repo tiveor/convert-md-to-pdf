@@ -7,6 +7,7 @@ A VS Code extension that exports Markdown files to high-quality PDFs using Chrom
 - **Export to PDF** — Convert any `.md` file to PDF via command palette or right-click menu
 - **Live Preview** — Side-by-side preview panel that updates as you type
 - **Mermaid Diagrams** — Renders flowcharts, sequence diagrams, and all Mermaid diagram types
+- **Marp Presentations** — Export Marp slides to PDF; auto-detected when `marp: true` is in front matter
 - **Page Orientation** — Auto, Portrait, or Landscape (auto fits wide diagrams to the page)
 - **Custom Styling** — Apply your own CSS themes to the PDF output
 - **Configurable** — Page size, margins, font size, headers, and footers

@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.3] - 2026-03-01
+
+### Added
+
+- New command **"Export Markdown to Presentation PDF"** using Marp CLI (`npx @marp-team/marp-cli`)
+- Available in editor right-click, explorer right-click, and command palette
+- Auto-detection of `marp: true` front matter: the regular export command now prompts to choose between Presentation PDF (Marp) or regular PDF (Chrome)
+
 ## [0.2.2] - 2026-03-01
 
 ### Changed

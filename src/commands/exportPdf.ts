@@ -4,6 +4,7 @@ import * as path from "path";
 import { getSettings, type PageOrientation } from "../config/settings";
 import { buildHtml } from "../pdf/htmlBuilder";
 import { generatePdf } from "../pdf/generator";
+import { hasMarpFrontMatter, exportPresentation } from "./exportPresentation";
 
 function hasMermaidBlocks(markdown: string): boolean {
   return /```mermaid/i.test(markdown);
@@ -37,8 +38,26 @@ export async function exportPdf(uri?: vscode.Uri): Promise<void> {
     document = editor.document;
   }
 
-  const settings = getSettings();
   const markdown = document.getText();
+
+  // If the file is a Marp presentation, suggest the dedicated export
+  if (hasMarpFrontMatter(markdown)) {
+    const pick = await vscode.window.showQuickPick(
+      [
+        { label: "Export as Presentation PDF", description: "Uses Marp CLI — respects slide layout and themes", value: "marp" },
+        { label: "Export as regular PDF", description: "Uses Chrome — renders as a document", value: "pdf" },
+      ],
+      { placeHolder: "Marp front matter detected — choose export format" }
+    );
+    if (!pick) {
+      return;
+    }
+    if (pick.value === "marp") {
+      return exportPresentation(uri);
+    }
+  }
+
+  const settings = getSettings();
 
   let customCss: string | undefined;
   if (settings.customCssPath) {
