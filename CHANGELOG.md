@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.4] - 2026-03-02
+
+### Changed
+
+- Presentation export now uses Marp Core + Puppeteer directly instead of spawning `npx @marp-team/marp-cli`
+- No external CLI dependency needed — uses the same bundled Chrome approach as regular PDF export
+- Added `@marp-team/marp-core` as a direct dependency
+
 ## [0.2.3] - 2026-03-01
 
 ### Added

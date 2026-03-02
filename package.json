@@ -2,7 +2,7 @@
   "name": "convert-md-to-pdf",
   "displayName": "Convert Markdown to PDF",
   "description": "Export Markdown files to PDF with custom styling and live preview",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "publisher": "alvarotech",
   "icon": "media/icon.png",
   "license": "MIT",
@@ -186,6 +186,7 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "@marp-team/marp-core": "^4.3.0",
     "highlight.js": "^11.9.0",
     "markdown-it": "^14.1.0",
     "puppeteer-core": "^22.6.0"
