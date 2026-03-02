@@ -1,12 +1,27 @@
 # Changelog
 
-## [0.2.4] - 2026-03-02
+## [0.2.5] - 2026-03-02
+
+### Added
+
+- **Excalidraw diagram rendering** in PDF export and live preview (`\`\`\`excalidraw` code blocks)
+- Renders Excalidraw JSON to hand-drawn SVGs using `@excalidraw/utils` via CDN
+- Orientation picker now triggers for both Mermaid and Excalidraw diagrams
 
 ### Changed
 
 - Presentation export now uses Marp Core + Puppeteer directly instead of spawning `npx @marp-team/marp-cli`
 - No external CLI dependency needed — uses the same bundled Chrome approach as regular PDF export
 - Added `@marp-team/marp-core` as a direct dependency
+
+### Fixed
+
+- Chrome browser process now force-killed after 5s if `browser.close()` hangs
+- Added 30s timeout on all Puppeteer page operations to prevent indefinite hangs
+- "Exporting PDF..." notification now closes immediately when the PDF is written (not when user dismisses the success message)
+- Added 60s overall timeout on PDF export to guarantee notification always closes
+- Presentation export was missing `headless: true`, causing a visible Chrome window on macOS
+- Added `--disable-gpu` flag to reduce macOS dock icon flash
 
 ## [0.2.3] - 2026-03-01
 

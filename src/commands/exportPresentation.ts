@@ -50,11 +50,14 @@ async function generatePresentationPdf(markdown: string, outputPath: string): Pr
 
   const browser = await puppeteer.launch({
     executablePath,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-gpu"],
   });
 
   try {
     const page = await browser.newPage();
+    page.setDefaultTimeout(30_000);
+    page.setDefaultNavigationTimeout(30_000);
     await page.goto(`file://${tmpFile}`, { waitUntil: "networkidle0" });
     await (page as any).pdf({
       path: outputPath,
@@ -64,7 +67,14 @@ async function generatePresentationPdf(markdown: string, outputPath: string): Pr
       margin: { top: "0", bottom: "0", left: "0", right: "0" },
     });
   } finally {
-    await browser.close();
+    const proc = browser.process();
+    try {
+      await Promise.race([
+        browser.close(),
+        new Promise((r) => setTimeout(r, 5_000)),
+      ]);
+    } catch { /* ignore */ }
+    if (proc && !proc.killed) { proc.kill("SIGKILL"); }
     try { fs.unlinkSync(tmpFile); } catch { /* ignore */ }
   }
 }
@@ -96,34 +106,41 @@ export async function exportPresentation(uri?: vscode.Uri): Promise<void> {
     return;
   }
 
-  await vscode.window.withProgress(
-    {
-      location: vscode.ProgressLocation.Notification,
-      title: "Exporting Presentation PDF...",
-      cancellable: false,
-    },
-    async () => {
-      try {
-        await generatePresentationPdf(markdown, outputUri.fsPath);
+  try {
+    await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: "Exporting Presentation PDF...",
+        cancellable: false,
+      },
+      () => Promise.race([
+        generatePresentationPdf(markdown, outputUri.fsPath),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("Presentation export timed out (60s)")), 60_000)
+        ),
+      ])
+    );
 
-        const action = await vscode.window.showInformationMessage(
-          `Presentation PDF saved: ${path.basename(outputUri.fsPath)}`,
-          "Open PDF",
-          "Open Folder"
-        );
-
-        if (action === "Open PDF") {
-          await vscode.env.openExternal(outputUri);
-        } else if (action === "Open Folder") {
-          await vscode.env.openExternal(
-            vscode.Uri.file(path.dirname(outputUri.fsPath))
-          );
-        }
-      } catch (err: unknown) {
-        const message =
-          err instanceof Error ? err.message : "Unknown error occurred";
-        vscode.window.showErrorMessage(`Presentation export failed: ${message}`);
-      }
+    if (!fs.existsSync(outputUri.fsPath)) {
+      throw new Error("PDF file was not created");
     }
-  );
+
+    const action = await vscode.window.showInformationMessage(
+      `Presentation PDF saved: ${path.basename(outputUri.fsPath)}`,
+      "Open PDF",
+      "Open Folder"
+    );
+
+    if (action === "Open PDF") {
+      await vscode.env.openExternal(outputUri);
+    } else if (action === "Open Folder") {
+      await vscode.env.openExternal(
+        vscode.Uri.file(path.dirname(outputUri.fsPath))
+      );
+    }
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : "Unknown error occurred";
+    vscode.window.showErrorMessage(`Presentation export failed: ${message}`);
+  }
 }

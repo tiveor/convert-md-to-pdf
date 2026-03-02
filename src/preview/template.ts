@@ -50,7 +50,7 @@ export function getPreviewHtml(
     th { font-weight: 600; }
     img { max-width: 100%; height: auto; }
     hr { border: none; border-top: 2px solid var(--vscode-panel-border); margin: 2em 0; }
-    .mermaid svg { max-width: 100%; height: auto; }
+    .mermaid svg, .excalidraw svg { max-width: 100%; height: auto; }
   </style>
 </head>
 <body>
@@ -64,6 +64,31 @@ export function getPreviewHtml(
         await mermaid.run({ nodes: [node] });
       } catch (e) {
         node.innerHTML = '<pre style="color:#c00;font-size:12px;">Mermaid render error: ' + e.message + '</pre>';
+      }
+    }
+  </script>
+  <script nonce="${nonce}" type="module">
+    const excalidrawNodes = document.querySelectorAll('.excalidraw');
+    if (excalidrawNodes.length > 0) {
+      const { exportToSvg } = await import('https://cdn.jsdelivr.net/npm/@excalidraw/utils@0.1.2/+esm');
+      for (const node of excalidrawNodes) {
+        try {
+          const json = JSON.parse(node.textContent || '{}');
+          const svg = await exportToSvg({
+            elements: json.elements || [],
+            appState: {
+              exportWithDarkMode: false,
+              exportBackground: true,
+              viewBackgroundColor: json.appState?.viewBackgroundColor || '#ffffff',
+              ...(json.appState || {}),
+            },
+            files: json.files || {},
+          });
+          node.innerHTML = '';
+          node.appendChild(svg);
+        } catch (e) {
+          node.innerHTML = '<pre style="color:#c00;font-size:12px;">Excalidraw render error: ' + e.message + '</pre>';
+        }
       }
     }
   </script>

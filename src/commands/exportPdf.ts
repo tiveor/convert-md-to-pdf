@@ -10,6 +10,10 @@ function hasMermaidBlocks(markdown: string): boolean {
   return /```mermaid/i.test(markdown);
 }
 
+function hasExcalidrawBlocks(markdown: string): boolean {
+  return /```excalidraw/i.test(markdown);
+}
+
 async function askOrientation(): Promise<PageOrientation | undefined> {
   const pick = await vscode.window.showQuickPick(
     [
@@ -18,7 +22,7 @@ async function askOrientation(): Promise<PageOrientation | undefined> {
       { label: "Landscape", description: "All pages horizontal", value: "landscape" as PageOrientation },
     ],
     {
-      placeHolder: "Mermaid diagrams detected — choose page orientation",
+      placeHolder: "Diagrams detected — choose page orientation",
     }
   );
   return pick?.value;
@@ -76,8 +80,8 @@ export async function exportPdf(uri?: vscode.Uri): Promise<void> {
     }
   }
 
-  // Ask for orientation when mermaid diagrams are detected
-  if (hasMermaidBlocks(markdown)) {
+  // Ask for orientation when diagrams are detected
+  if (hasMermaidBlocks(markdown) || hasExcalidrawBlocks(markdown)) {
     const chosen = await askOrientation();
     if (chosen === undefined) {
       return; // user cancelled
@@ -99,34 +103,41 @@ export async function exportPdf(uri?: vscode.Uri): Promise<void> {
     return;
   }
 
-  await vscode.window.withProgress(
-    {
-      location: vscode.ProgressLocation.Notification,
-      title: "Exporting PDF...",
-      cancellable: false,
-    },
-    async () => {
-      try {
-        await generatePdf(html, outputUri.fsPath, settings);
+  try {
+    await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: "Exporting PDF...",
+        cancellable: false,
+      },
+      () => Promise.race([
+        generatePdf(html, outputUri.fsPath, settings),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("PDF export timed out (60s)")), 60_000)
+        ),
+      ])
+    );
 
-        const action = await vscode.window.showInformationMessage(
-          `PDF saved: ${path.basename(outputUri.fsPath)}`,
-          "Open PDF",
-          "Open Folder"
-        );
-
-        if (action === "Open PDF") {
-          await vscode.env.openExternal(outputUri);
-        } else if (action === "Open Folder") {
-          await vscode.env.openExternal(
-            vscode.Uri.file(path.dirname(outputUri.fsPath))
-          );
-        }
-      } catch (err: unknown) {
-        const message =
-          err instanceof Error ? err.message : "Unknown error occurred";
-        vscode.window.showErrorMessage(`PDF export failed: ${message}`);
-      }
+    if (!fs.existsSync(outputUri.fsPath)) {
+      throw new Error("PDF file was not created");
     }
-  );
+
+    const action = await vscode.window.showInformationMessage(
+      `PDF saved: ${path.basename(outputUri.fsPath)}`,
+      "Open PDF",
+      "Open Folder"
+    );
+
+    if (action === "Open PDF") {
+      await vscode.env.openExternal(outputUri);
+    } else if (action === "Open Folder") {
+      await vscode.env.openExternal(
+        vscode.Uri.file(path.dirname(outputUri.fsPath))
+      );
+    }
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : "Unknown error occurred";
+    vscode.window.showErrorMessage(`PDF export failed: ${message}`);
+  }
 }

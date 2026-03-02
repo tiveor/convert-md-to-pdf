@@ -117,8 +117,9 @@ h1, h2, h3, h4, h5, h6 {
   break-after: avoid;
 }
 
-/* Prevent page breaks inside mermaid diagrams */
-.mermaid {
+/* Prevent page breaks inside diagrams */
+.mermaid,
+.excalidraw {
   break-inside: avoid;
 }
 

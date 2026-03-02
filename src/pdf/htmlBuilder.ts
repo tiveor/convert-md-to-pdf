@@ -12,6 +12,9 @@ function highlight(str: string, lang: string): string {
   if (lang === "mermaid") {
     return `<pre class="mermaid">${str}</pre>`;
   }
+  if (lang === "excalidraw") {
+    return `<pre class="excalidraw">${MarkdownIt().utils.escapeHtml(str)}</pre>`;
+  }
   if (lang && hljs.getLanguage(lang)) {
     try {
       return `<pre class="hljs"><code>${hljs.highlight(str, { language: lang }).value}</code></pre>`;

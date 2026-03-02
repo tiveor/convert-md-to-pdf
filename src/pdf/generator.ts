@@ -6,6 +6,7 @@ import type { PdfSettings } from "../config/settings";
 import { findChrome } from "./chromeFinder";
 
 const MERMAID_CDN = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js";
+const EXCALIDRAW_CDN = "https://cdn.jsdelivr.net/npm/@excalidraw/utils@0.1.2/dist/excalidraw-utils.min.js";
 
 const PAGE_SIZES: Record<string, { width: number; height: number }> = {
   A4: { width: 8.27, height: 11.69 },
@@ -57,11 +58,13 @@ export async function generatePdf(
   const browser = await puppeteer.launch({
     executablePath,
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-gpu"],
   });
 
   try {
     const page = await browser.newPage();
+    page.setDefaultTimeout(30_000);
+    page.setDefaultNavigationTimeout(30_000);
     const size = PAGE_SIZES[settings.pageSize] || PAGE_SIZES.A4;
 
     // Use uniform orientation — "auto" defaults to portrait (no mixed pages = no blank pages)
@@ -75,6 +78,7 @@ export async function generatePdf(
     await page.goto(`file://${tmpFile}`, { waitUntil: "networkidle0" });
 
     const hasMermaid = await page.evaluate(() => document.querySelectorAll(".mermaid").length > 0);
+    const hasExcalidraw = await page.evaluate(() => document.querySelectorAll(".excalidraw").length > 0);
 
     if (hasMermaid) {
       // Zero out mermaid container padding BEFORE rendering so SVGs use full content width
@@ -100,6 +104,40 @@ export async function generatePdf(
       });
     }
 
+    if (hasExcalidraw) {
+      await page.evaluate(() => {
+        document.querySelectorAll<HTMLElement>(".excalidraw").forEach((el) => {
+          el.style.padding = "0";
+          el.style.background = "none";
+        });
+      });
+
+      await page.addScriptTag({ url: EXCALIDRAW_CDN });
+      await page.evaluate(async () => {
+        const { exportToSvg } = (window as any).ExcalidrawUtils;
+        const nodes = Array.from(document.querySelectorAll<HTMLElement>(".excalidraw"));
+        for (const node of nodes) {
+          try {
+            const json = JSON.parse(node.textContent || "{}");
+            const svg = await exportToSvg({
+              elements: json.elements || [],
+              appState: {
+                exportWithDarkMode: false,
+                exportBackground: true,
+                viewBackgroundColor: json.appState?.viewBackgroundColor || "#ffffff",
+                ...(json.appState || {}),
+              },
+              files: json.files || {},
+            });
+            node.innerHTML = "";
+            node.appendChild(svg);
+          } catch (e: any) {
+            node.innerHTML = `<pre style="color:#c00;font-size:12px;">Excalidraw render error: ${e?.message || e}</pre>`;
+          }
+        }
+      });
+    }
+
     // Single @page rule — uniform orientation for entire document (no mixed pages)
     const pageW = useLandscape ? size.height : size.width;
     const pageH = useLandscape ? size.width : size.height;
@@ -117,7 +155,7 @@ export async function generatePdf(
       pageW, pageH, top, bottom, left, right
     );
 
-    if (hasMermaid) {
+    if (hasMermaid || hasExcalidraw) {
       // Remove <hr> elements that create unwanted spacing
       await page.evaluate(() => {
         document.querySelectorAll("hr").forEach((hr) => hr.remove());
@@ -125,7 +163,7 @@ export async function generatePdf(
 
       await page.evaluate(
         (cW: number, cH: number, minScale: number) => {
-          document.querySelectorAll<HTMLElement>(".mermaid").forEach((container) => {
+          document.querySelectorAll<HTMLElement>(".mermaid, .excalidraw").forEach((container) => {
             const svg = container.querySelector("svg") as SVGSVGElement | null;
             if (!svg) return;
 
@@ -153,10 +191,10 @@ export async function generatePdf(
             let trailingH = 0;
             let sib = container.nextElementSibling as HTMLElement | null;
             while (sib) {
-              if (sib.classList.contains("mermaid")) break;
+              if (sib.classList.contains("mermaid") || sib.classList.contains("excalidraw")) break;
               if (/^H[1-6]$/.test(sib.tagName)) {
                 const afterH = sib.nextElementSibling;
-                if (afterH && afterH.classList.contains("mermaid")) break;
+                if (afterH && (afterH.classList.contains("mermaid") || afterH.classList.contains("excalidraw"))) break;
               }
               const cs = getComputedStyle(sib);
               trailingH += sib.getBoundingClientRect().height
@@ -234,7 +272,7 @@ export async function generatePdf(
               svgClone.style.marginTop = `-${page1H}px`;
 
               const c2 = document.createElement("div");
-              c2.className = "mermaid";
+              c2.className = container.className;
               c2.style.padding = "0";
               c2.style.background = "none";
               c2.appendChild(svgClone);
@@ -274,7 +312,14 @@ export async function generatePdf(
       footerTemplate: settings.footerTemplate || "<span></span>",
     });
   } finally {
-    await browser.close();
-    try { fs.unlinkSync(tmpFile); } catch {}
+    const proc = browser.process();
+    try {
+      await Promise.race([
+        browser.close(),
+        new Promise((r) => setTimeout(r, 5_000)),
+      ]);
+    } catch { /* ignore */ }
+    if (proc && !proc.killed) { proc.kill("SIGKILL"); }
+    try { fs.unlinkSync(tmpFile); } catch { /* ignore */ }
   }
 }
