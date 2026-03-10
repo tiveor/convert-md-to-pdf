@@ -2,7 +2,7 @@
   "name": "convert-md-to-pdf",
   "displayName": "Convert Markdown to PDF",
   "description": "Export Markdown files to PDF with custom styling and live preview",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "publisher": "alvarotech",
   "icon": "media/icon.png",
   "license": "MIT",
@@ -55,6 +55,11 @@
         },
         {
           "command": "convert-md-to-pdf.export",
+          "when": "editorLangId == markdown",
+          "group": "navigation"
+        },
+        {
+          "command": "convert-md-to-pdf.exportPresentation",
           "when": "editorLangId == markdown",
           "group": "navigation"
         }
@@ -165,6 +170,25 @@
             "All pages in landscape (horizontal) orientation"
           ],
           "description": "Page orientation for PDF export. 'auto' mixes portrait and landscape per diagram width."
+        },
+        "convertMdToPdf.diagramTheme": {
+          "type": "string",
+          "default": "ocean",
+          "enum": [
+            "ocean",
+            "forest",
+            "rose",
+            "slate",
+            "sunset"
+          ],
+          "enumDescriptions": [
+            "Blue tones — clean and professional",
+            "Green tones — natural and fresh",
+            "Pink/purple tones — warm and modern",
+            "Gray tones — minimal and neutral",
+            "Orange/amber tones — warm and energetic"
+          ],
+          "description": "Color theme for Mermaid diagrams (flowcharts, sequence diagrams, etc.)"
         },
         "convertMdToPdf.headerTemplate": {
           "type": "string",

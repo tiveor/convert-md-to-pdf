@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import type { MermaidThemeName } from "./mermaidTheme";
 
 export type PageOrientation = "auto" | "portrait" | "landscape";
 
@@ -16,6 +17,7 @@ export interface PdfSettings {
   customCssPath: string;
   headerTemplate: string;
   footerTemplate: string;
+  diagramTheme: MermaidThemeName;
 }
 
 export function getSettings(): PdfSettings {
@@ -38,5 +40,6 @@ export function getSettings(): PdfSettings {
       "footerTemplate",
       '<div style="font-size:10px;text-align:center;width:100%"><span class="pageNumber"></span> / <span class="totalPages"></span></div>'
     ),
+    diagramTheme: config.get<MermaidThemeName>("diagramTheme", "ocean"),
   };
 }

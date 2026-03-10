@@ -1,4 +1,5 @@
 import type * as vscode from "vscode";
+import { getMermaidConfig } from "../config/mermaidTheme";
 
 export function getPreviewHtml(
   bodyHtml: string,
@@ -57,10 +58,11 @@ export function getPreviewHtml(
   ${bodyHtml}
   <script nonce="${nonce}" type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-    mermaid.initialize({ startOnLoad: false, theme: 'default' });
+    mermaid.initialize(${JSON.stringify(getMermaidConfig())});
     const nodes = document.querySelectorAll('.mermaid');
     for (const node of nodes) {
       try {
+        node.textContent = (node.textContent || '').replace(/^\\s*style\\s+\\S+\\s+fill:.*$/gm, '');
         await mermaid.run({ nodes: [node] });
       } catch (e) {
         node.innerHTML = '<pre style="color:#c00;font-size:12px;">Mermaid render error: ' + e.message + '</pre>';

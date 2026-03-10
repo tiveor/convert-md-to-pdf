@@ -9,6 +9,7 @@ A VS Code extension that exports Markdown files to high-quality PDFs using Chrom
 - **Mermaid Diagrams** — Renders flowcharts, sequence diagrams, and all Mermaid diagram types
 - **Excalidraw Diagrams** — Renders `\`\`\`excalidraw` JSON blocks as hand-drawn SVGs in PDF and preview
 - **Marp Presentations** — Export Marp slides to PDF; auto-detected when `marp: true` is in front matter
+- **Diagram Themes** — 5 color themes for Mermaid diagrams: Ocean, Forest, Rose, Slate, Sunset
 - **Page Orientation** — Auto, Portrait, or Landscape (auto fits wide diagrams to the page)
 - **Custom Styling** — Apply your own CSS themes to the PDF output
 - **Configurable** — Page size, margins, font size, headers, and footers
@@ -39,6 +40,7 @@ Click the eye icon in the editor title bar, or run **"Open PDF Preview"** from t
 | `convertMdToPdf.orientation` | `auto` | Page orientation: `auto`, `portrait`, `landscape` |
 | `convertMdToPdf.margins` | `20mm / 15mm` | Top, bottom, left, right margins |
 | `convertMdToPdf.fontSize` | `14` | Base font size in pixels |
+| `convertMdToPdf.diagramTheme` | `ocean` | Mermaid diagram theme: `ocean`, `forest`, `rose`, `slate`, `sunset` |
 | `convertMdToPdf.customCssPath` | — | Path to a custom CSS file |
 | `convertMdToPdf.headerTemplate` | — | HTML header template |
 | `convertMdToPdf.footerTemplate` | Page numbers | HTML footer template |

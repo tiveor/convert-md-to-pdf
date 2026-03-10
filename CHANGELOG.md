@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.2.6] - 2026-03-10
+
+### Added
+
+- **Diagram theme selector**: new `convertMdToPdf.diagramTheme` setting with 5 preset themes for Mermaid diagrams
+  - **ocean** — blue tones, clean and professional (default)
+  - **forest** — green tones, natural and fresh
+  - **rose** — pink/purple tones, warm and modern
+  - **slate** — gray tones, minimal and neutral
+  - **sunset** — orange/amber tones, warm and energetic
+- Shared theme config module (`mermaidTheme.ts`) used across PDF export, preview, and presentations
+
+### Fixed
+
+- Flowchart diagrams now render with consistent, readable colors matching sequence diagrams
+- Inline `style` directives in Mermaid source are stripped so the selected theme always applies uniformly
+
 ## [0.2.5] - 2026-03-02
 
 ### Added

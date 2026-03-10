@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import type { PdfSettings } from "../config/settings";
+import { getMermaidConfig } from "../config/mermaidTheme";
 import { findChrome } from "./chromeFinder";
 
 const MERMAID_CDN = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js";
@@ -90,18 +91,20 @@ export async function generatePdf(
       });
 
       await page.addScriptTag({ url: MERMAID_CDN });
-      await page.evaluate(async () => {
+      await page.evaluate(async (cfg: any) => {
         const m = (window as any).mermaid;
-        m.initialize({ startOnLoad: false, theme: "default" });
+        m.initialize(cfg);
         const nodes = Array.from(document.querySelectorAll<HTMLElement>(".mermaid"));
         for (const node of nodes) {
           try {
+            // Strip inline style directives so the theme applies uniformly
+            node.textContent = (node.textContent || "").replace(/^\s*style\s+\S+\s+fill:.*$/gm, "");
             await m.run({ nodes: [node] });
           } catch {
             node.innerHTML = `<pre style="color:#c00;font-size:12px;">Mermaid render error</pre>`;
           }
         }
-      });
+      }, { ...getMermaidConfig() });
     }
 
     if (hasExcalidraw) {
