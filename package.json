@@ -206,7 +206,7 @@
   "scripts": {
     "dev": "node esbuild.mjs --watch",
     "build": "node esbuild.mjs --production",
-    "package": "pnpm build && vsce package --no-dependencies",
+    "package": "pnpm build && vsce package --no-dependencies -o dist/",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
