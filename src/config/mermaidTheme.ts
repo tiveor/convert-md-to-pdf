@@ -1,10 +1,5 @@
 import * as vscode from "vscode";
 
-/** Strip inline `style` directives from mermaid source so the theme always applies */
-export function stripMermaidInlineStyles(src: string): string {
-  return src.replace(/^\s*style\s+\S+\s+fill:.*$/gm, "");
-}
-
 export type MermaidThemeName = "ocean" | "forest" | "rose" | "slate" | "sunset";
 
 interface ThemeVars {
@@ -153,10 +148,3 @@ export function getMermaidConfig(): { startOnLoad: false; theme: "base"; themeVa
     themeVariables: THEMES[name] || THEMES.ocean,
   };
 }
-
-/** Static config for contexts without vscode API (defaults to ocean) */
-export const MERMAID_CONFIG = {
-  startOnLoad: false,
-  theme: "base" as const,
-  themeVariables: THEMES.ocean,
-};

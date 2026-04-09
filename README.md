@@ -18,39 +18,44 @@
 
 ---
 
-A VS Code extension that turns your Markdown into polished, print-ready PDFs — complete with Mermaid diagrams, Excalidraw sketches, Marp presentations, syntax highlighting, and custom themes. All rendered locally via Chrome.
+A VS Code extension that turns Markdown into polished, print-ready PDFs using Chrome/Chromium. Supports Mermaid diagrams, Excalidraw sketches, Marp slide decks, syntax-highlighted code blocks, and custom CSS themes — all rendered locally.
 
 ## Features
 
-- **Export to PDF** — One-click export from the command palette or right-click menu
-- **Live Preview** — Side-by-side panel that updates in real time as you type
-- **Mermaid Diagrams** — Flowcharts, sequence diagrams, class diagrams, and more
-- **Excalidraw Sketches** — Hand-drawn style diagrams from JSON blocks
-- **Marp Presentations** — Slide decks to PDF, auto-detected via `marp: true` front matter
-- **5 Diagram Themes** — Ocean, Forest, Rose, Slate, Sunset — pick one in settings
-- **Smart Orientation** — Auto-detects wide diagrams and adjusts page layout
-- **Custom CSS** — Full control over PDF styling with your own stylesheet
-- **Configurable** — Page size, margins, font size, headers, footers, and more
+- **Export to PDF** — Convert any `.md` file via command palette, editor title bar, or right-click menu (editor and file explorer)
+- **Live Preview** — Side-by-side preview panel that re-renders as you type
+- **Mermaid Diagrams** — Flowcharts, sequence diagrams, class diagrams, and all Mermaid types rendered via CDN (v11)
+- **Excalidraw Sketches** — Hand-drawn style SVGs from ` ```excalidraw ` JSON blocks
+- **Marp Presentations** — Auto-detects `marp: true` front matter and prompts to export as a slide deck PDF (1280x720 per slide) or a regular document PDF
+- **Diagram Themes** — 5 built-in color themes for Mermaid diagrams; inline `style` directives are stripped so the theme always applies uniformly
+- **Page Orientation Picker** — When diagrams are detected, prompts to choose Auto, Portrait, or Landscape
+- **Syntax Highlighting** — Code blocks highlighted with highlight.js using a GitHub-inspired theme
+- **Custom CSS** — Apply your own stylesheet (absolute path or relative to workspace root)
+- **Configurable** — Page size, margins, font size, headers, footers, and Chrome path
+
+## Commands
+
+| Command | Description |
+|---|---|
+| `Export Markdown to PDF` | Export the active `.md` file to PDF. Prompts for orientation when diagrams are detected. |
+| `Open PDF Preview` | Open a live preview panel beside the editor. |
+| `Export Markdown to Presentation PDF` | Export as a Marp slide deck PDF (also triggered automatically when `marp: true` is detected during regular export). |
+
+All three commands are available from:
+- **Command Palette** (`Cmd+Shift+P` / `Ctrl+Shift+P`)
+- **Editor title bar** icons (when a `.md` file is open)
+- **Right-click context menu** in the editor or file explorer
 
 ## Quick Start
 
 1. Install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=alvarotech.convert-md-to-pdf)
 2. Open any `.md` file
-3. `Cmd+Shift+P` (or `Ctrl+Shift+P`) &rarr; **Export Markdown to PDF**
-
-> You can also right-click any `.md` file in the explorer or editor.
-
-### Live Preview
-
-Click the preview icon in the editor title bar, or run **"Open PDF Preview"** from the command palette.
-
-### Marp Presentations
-
-Add `marp: true` to your front matter and the extension will prompt you to export as a presentation PDF with slide layout.
+3. `Cmd+Shift+P` &rarr; **Export Markdown to PDF**
+4. Choose where to save — done!
 
 ## Diagram Themes
 
-Choose a color theme for your Mermaid diagrams via `convertMdToPdf.diagramTheme`:
+Set `convertMdToPdf.diagramTheme` in your VS Code settings:
 
 | Theme | Style |
 |-------|-------|
@@ -60,30 +65,43 @@ Choose a color theme for your Mermaid diagrams via `convertMdToPdf.diagramTheme`
 | `slate` | Gray tones — minimal and neutral |
 | `sunset` | Orange/amber tones — warm and energetic |
 
+Themes control node fill, border, text color, connector lines, cluster backgrounds, and edge labels across all Mermaid diagram types.
+
 ## Settings
+
+All settings are under the `convertMdToPdf.*` namespace.
 
 | Setting | Default | Description |
 |---|---|---|
-| `chromePath` | Auto-detect | Path to Chrome/Chromium executable |
-| `pageSize` | `A4` | A4, Letter, Legal, Tabloid |
-| `orientation` | `auto` | `auto`, `portrait`, `landscape` |
-| `margins` | `20mm / 15mm` | Top, bottom, left, right margins |
+| `chromePath` | Auto-detect | Path to Chrome/Chromium executable. Auto-detected on macOS, Windows, and Linux. |
+| `pageSize` | `A4` | Page size: `A4`, `Letter`, `Legal`, `Tabloid` |
+| `orientation` | `auto` | Page orientation: `auto`, `portrait`, `landscape` |
+| `margins` | `{ top: 20mm, bottom: 20mm, left: 15mm, right: 15mm }` | Page margins (supports `mm`, `cm`, `in`, or `px`) |
 | `fontSize` | `14` | Base font size in pixels |
-| `diagramTheme` | `ocean` | Mermaid theme: `ocean`, `forest`, `rose`, `slate`, `sunset` |
-| `customCssPath` | — | Path to a custom CSS file |
-| `headerTemplate` | — | HTML header template (Puppeteer format) |
-| `footerTemplate` | Page numbers | HTML footer template (Puppeteer format) |
+| `diagramTheme` | `ocean` | Mermaid diagram theme: `ocean`, `forest`, `rose`, `slate`, `sunset` |
+| `customCssPath` | — | Path to a custom CSS file (absolute, or relative to workspace root) |
+| `headerTemplate` | — | HTML template for page headers ([Puppeteer classes](https://pptr.dev/api/puppeteer.pdfoptions#headertemplate)) |
+| `footerTemplate` | Page numbers | HTML template for page footers. Default: `<span class="pageNumber"></span> / <span class="totalPages"></span>` |
 
-> All settings are prefixed with `convertMdToPdf.` in your VS Code settings.
+## How It Works
+
+1. Markdown is parsed with [markdown-it](https://github.com/markdown-it/markdown-it) (HTML, linkify, typographer enabled)
+2. YAML front matter is stripped before rendering
+3. Code blocks are syntax-highlighted with [highlight.js](https://highlightjs.org/)
+4. ` ```mermaid ` and ` ```excalidraw ` blocks are converted to renderable containers
+5. The HTML is loaded in a headless Chrome instance via [Puppeteer](https://pptr.dev/)
+6. Mermaid (v11 CDN) and Excalidraw render diagrams client-side in the browser
+7. Diagrams are auto-scaled to fit the page — large diagrams are split across pages when needed
+8. Chrome prints to PDF with the configured page size, margins, and orientation
 
 ## Requirements
 
-- [Google Chrome](https://www.google.com/chrome/) or any Chromium-based browser
-- Auto-detected on macOS, Windows, and Linux — or set the path manually
+- [Google Chrome](https://www.google.com/chrome/) or any Chromium-based browser (Edge, Brave, etc.)
+- Auto-detected on macOS, Windows, and Linux — or set the path manually via `convertMdToPdf.chromePath`
 
 ## Contributing
 
-Contributions are welcome! Feel free to open issues and pull requests.
+Contributions, issues, and feature requests are welcome!
 
 ```bash
 git clone https://github.com/tiveor/convert-md-to-pdf.git
