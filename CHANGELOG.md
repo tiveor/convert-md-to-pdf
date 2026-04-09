@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.7] - 2026-04-09
+
+### Fixed
+
+- **Windows browser detection**: check Program Files, Program Files (x86), LocalAppData, PATH (`where`), and Windows Registry App Paths for Chrome, Edge, Brave, and Chromium (thanks @deezel! [#1](https://github.com/tiveor/convert-md-to-pdf/pull/1))
+- Fixed CRLF parsing from `where` output on Windows
+
+### Changed
+
+- `.vsix` packages now output to `dist/` instead of project root
+- Removed unused exports from mermaid theme module
+- Updated README to accurately reflect codebase features and commands
+- Updated LICENSE copyright to Alvaro Orellana (tiveor)
+
 ## [0.2.6] - 2026-03-10
 
 ### Added
