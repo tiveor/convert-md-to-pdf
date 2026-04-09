@@ -1,59 +1,100 @@
-# Convert Markdown to PDF
+<p align="center">
+  <img src="media/icon.png" alt="Convert Markdown to PDF" width="128" height="128">
+</p>
 
-A VS Code extension that exports Markdown files to high-quality PDFs using Chrome/Chromium.
+<h1 align="center">Convert Markdown to PDF</h1>
+
+<p align="center">
+  <strong>Beautiful PDFs from Markdown — with diagrams, presentations, and live preview.</strong>
+</p>
+
+<p align="center">
+  <a href="https://marketplace.visualstudio.com/items?itemName=alvarotech.convert-md-to-pdf"><img src="https://img.shields.io/visual-studio-marketplace/v/alvarotech.convert-md-to-pdf?style=flat-square&label=Marketplace&color=007ACC" alt="VS Marketplace"></a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=alvarotech.convert-md-to-pdf"><img src="https://img.shields.io/visual-studio-marketplace/i/alvarotech.convert-md-to-pdf?style=flat-square&label=Installs&color=4CAF50" alt="Installs"></a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=alvarotech.convert-md-to-pdf"><img src="https://img.shields.io/visual-studio-marketplace/r/alvarotech.convert-md-to-pdf?style=flat-square&label=Rating&color=FFC107" alt="Rating"></a>
+  <a href="https://github.com/tiveor/convert-md-to-pdf/blob/main/LICENSE"><img src="https://img.shields.io/github/license/tiveor/convert-md-to-pdf?style=flat-square&color=blue" alt="License"></a>
+  <a href="https://github.com/tiveor/convert-md-to-pdf"><img src="https://img.shields.io/github/stars/tiveor/convert-md-to-pdf?style=flat-square&color=yellow" alt="GitHub Stars"></a>
+</p>
+
+---
+
+A VS Code extension that turns your Markdown into polished, print-ready PDFs — complete with Mermaid diagrams, Excalidraw sketches, Marp presentations, syntax highlighting, and custom themes. All rendered locally via Chrome.
 
 ## Features
 
-- **Export to PDF** — Convert any `.md` file to PDF via command palette or right-click menu
-- **Live Preview** — Side-by-side preview panel that updates as you type
-- **Mermaid Diagrams** — Renders flowcharts, sequence diagrams, and all Mermaid diagram types
-- **Excalidraw Diagrams** — Renders `\`\`\`excalidraw` JSON blocks as hand-drawn SVGs in PDF and preview
-- **Marp Presentations** — Export Marp slides to PDF; auto-detected when `marp: true` is in front matter
-- **Diagram Themes** — 5 color themes for Mermaid diagrams: Ocean, Forest, Rose, Slate, Sunset
-- **Page Orientation** — Auto, Portrait, or Landscape (auto fits wide diagrams to the page)
-- **Custom Styling** — Apply your own CSS themes to the PDF output
-- **Configurable** — Page size, margins, font size, headers, and footers
+- **Export to PDF** — One-click export from the command palette or right-click menu
+- **Live Preview** — Side-by-side panel that updates in real time as you type
+- **Mermaid Diagrams** — Flowcharts, sequence diagrams, class diagrams, and more
+- **Excalidraw Sketches** — Hand-drawn style diagrams from JSON blocks
+- **Marp Presentations** — Slide decks to PDF, auto-detected via `marp: true` front matter
+- **5 Diagram Themes** — Ocean, Forest, Rose, Slate, Sunset — pick one in settings
+- **Smart Orientation** — Auto-detects wide diagrams and adjusts page layout
+- **Custom CSS** — Full control over PDF styling with your own stylesheet
+- **Configurable** — Page size, margins, font size, headers, footers, and more
 
-## Requirements
+## Quick Start
 
-- [Google Chrome](https://www.google.com/chrome/) or Chromium-based browser installed
-- The extension auto-detects Chrome on macOS, Windows, and Linux
+1. Install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=alvarotech.convert-md-to-pdf)
+2. Open any `.md` file
+3. `Cmd+Shift+P` (or `Ctrl+Shift+P`) &rarr; **Export Markdown to PDF**
 
-## Usage
-
-1. Open a Markdown file
-2. Run **"Export Markdown to PDF"** from the command palette (`Cmd+Shift+P` / `Ctrl+Shift+P`)
-3. Choose where to save the PDF
-
-Or right-click a `.md` file in the explorer and select **"Export to PDF"**.
+> You can also right-click any `.md` file in the explorer or editor.
 
 ### Live Preview
 
-Click the eye icon in the editor title bar, or run **"Open PDF Preview"** from the command palette.
+Click the preview icon in the editor title bar, or run **"Open PDF Preview"** from the command palette.
 
-## Extension Settings
+### Marp Presentations
+
+Add `marp: true` to your front matter and the extension will prompt you to export as a presentation PDF with slide layout.
+
+## Diagram Themes
+
+Choose a color theme for your Mermaid diagrams via `convertMdToPdf.diagramTheme`:
+
+| Theme | Style |
+|-------|-------|
+| `ocean` | Blue tones — clean and professional **(default)** |
+| `forest` | Green tones — natural and fresh |
+| `rose` | Pink/purple tones — warm and modern |
+| `slate` | Gray tones — minimal and neutral |
+| `sunset` | Orange/amber tones — warm and energetic |
+
+## Settings
 
 | Setting | Default | Description |
 |---|---|---|
-| `convertMdToPdf.chromePath` | Auto-detect | Path to Chrome/Chromium executable |
-| `convertMdToPdf.pageSize` | `A4` | Page size: A4, Letter, Legal, Tabloid |
-| `convertMdToPdf.orientation` | `auto` | Page orientation: `auto`, `portrait`, `landscape` |
-| `convertMdToPdf.margins` | `20mm / 15mm` | Top, bottom, left, right margins |
-| `convertMdToPdf.fontSize` | `14` | Base font size in pixels |
-| `convertMdToPdf.diagramTheme` | `ocean` | Mermaid diagram theme: `ocean`, `forest`, `rose`, `slate`, `sunset` |
-| `convertMdToPdf.customCssPath` | — | Path to a custom CSS file |
-| `convertMdToPdf.headerTemplate` | — | HTML header template |
-| `convertMdToPdf.footerTemplate` | Page numbers | HTML footer template |
+| `chromePath` | Auto-detect | Path to Chrome/Chromium executable |
+| `pageSize` | `A4` | A4, Letter, Legal, Tabloid |
+| `orientation` | `auto` | `auto`, `portrait`, `landscape` |
+| `margins` | `20mm / 15mm` | Top, bottom, left, right margins |
+| `fontSize` | `14` | Base font size in pixels |
+| `diagramTheme` | `ocean` | Mermaid theme: `ocean`, `forest`, `rose`, `slate`, `sunset` |
+| `customCssPath` | — | Path to a custom CSS file |
+| `headerTemplate` | — | HTML header template (Puppeteer format) |
+| `footerTemplate` | Page numbers | HTML footer template (Puppeteer format) |
 
-## Development
+> All settings are prefixed with `convertMdToPdf.` in your VS Code settings.
+
+## Requirements
+
+- [Google Chrome](https://www.google.com/chrome/) or any Chromium-based browser
+- Auto-detected on macOS, Windows, and Linux — or set the path manually
+
+## Contributing
+
+Contributions are welcome! Feel free to open issues and pull requests.
 
 ```bash
+git clone https://github.com/tiveor/convert-md-to-pdf.git
+cd convert-md-to-pdf
 pnpm install
-pnpm dev        # watch mode
-# Press F5 in VS Code to launch Extension Development Host
-pnpm build      # production build
+pnpm dev          # watch mode with hot reload
+# Press F5 in VS Code to launch the Extension Development Host
+pnpm build        # production build
+pnpm package      # create .vsix package
 ```
 
 ## License
 
-MIT
+[MIT](LICENSE) &copy; [Alvaro Orellana](https://github.com/tiveor)
