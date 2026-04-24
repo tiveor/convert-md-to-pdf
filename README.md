@@ -9,11 +9,13 @@
 </p>
 
 <p align="center">
-  <a href="https://marketplace.visualstudio.com/items?itemName=alvarotech.convert-md-to-pdf"><img src="https://img.shields.io/visual-studio-marketplace/v/alvarotech.convert-md-to-pdf?style=flat-square&label=Marketplace&color=007ACC" alt="VS Marketplace"></a>
-  <a href="https://marketplace.visualstudio.com/items?itemName=alvarotech.convert-md-to-pdf"><img src="https://img.shields.io/visual-studio-marketplace/i/alvarotech.convert-md-to-pdf?style=flat-square&label=Installs&color=4CAF50" alt="Installs"></a>
-  <a href="https://marketplace.visualstudio.com/items?itemName=alvarotech.convert-md-to-pdf"><img src="https://img.shields.io/visual-studio-marketplace/r/alvarotech.convert-md-to-pdf?style=flat-square&label=Rating&color=FFC107" alt="Rating"></a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=alvarotech.convert-md-to-pdf"><img src="https://img.shields.io/github/v/release/tiveor/convert-md-to-pdf?style=flat-square&label=Release&color=007ACC" alt="Latest Release"></a>
+  <a href="https://github.com/tiveor/convert-md-to-pdf/commits/main"><img src="https://img.shields.io/github/last-commit/tiveor/convert-md-to-pdf?style=flat-square&color=4CAF50" alt="Last Commit"></a>
+  <a href="https://github.com/tiveor/convert-md-to-pdf/issues"><img src="https://img.shields.io/github/issues/tiveor/convert-md-to-pdf?style=flat-square&color=orange" alt="Open Issues"></a>
+  <a href="https://github.com/tiveor/convert-md-to-pdf/graphs/contributors"><img src="https://img.shields.io/github/contributors/tiveor/convert-md-to-pdf?style=flat-square&color=purple" alt="Contributors"></a>
   <a href="https://github.com/tiveor/convert-md-to-pdf/blob/main/LICENSE"><img src="https://img.shields.io/github/license/tiveor/convert-md-to-pdf?style=flat-square&color=blue" alt="License"></a>
   <a href="https://github.com/tiveor/convert-md-to-pdf"><img src="https://img.shields.io/github/stars/tiveor/convert-md-to-pdf?style=flat-square&color=yellow" alt="GitHub Stars"></a>
+  <a href="https://github.com/tiveor/convert-md-to-pdf/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square" alt="PRs Welcome"></a>
 </p>
 
 ---
