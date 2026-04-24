@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.8] - 2026-04-24
+
+### Added
+
+- Unit test suite with [vitest](https://vitest.dev/) — 35 tests covering `mermaidTheme`, `settings`, `htmlBuilder`, and `chromeFinder`
+- `pnpm test` and `pnpm test:watch` scripts
+
+### Changed
+
+- Replaced retired `visual-studio-marketplace` badges with GitHub-based ones (Release, Last Commit, Issues, Contributors, PRs Welcome)
+
 ## [0.2.7] - 2026-04-09
 
 ### Fixed
