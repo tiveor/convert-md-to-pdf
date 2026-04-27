@@ -89,9 +89,9 @@ export async function exportPdf(uri?: vscode.Uri): Promise<void> {
     settings.orientation = chosen;
   }
 
-  const html = buildHtml(markdown, settings, customCss);
-
   const mdPath = document.uri.fsPath;
+  const html = buildHtml(markdown, settings, customCss, path.dirname(mdPath));
+
   const defaultOutputPath = mdPath.replace(/\.md$/i, ".pdf");
 
   const outputUri = await vscode.window.showSaveDialog({

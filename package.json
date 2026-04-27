@@ -2,7 +2,7 @@
   "name": "convert-md-to-pdf",
   "displayName": "Convert Markdown to PDF",
   "description": "Export Markdown files to PDF with custom styling and live preview",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "publisher": "alvarotech",
   "icon": "media/icon.png",
   "license": "MIT",

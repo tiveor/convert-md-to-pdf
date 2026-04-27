@@ -84,4 +84,20 @@ describe("buildHtml", () => {
     const html = buildHtml(md, defaults);
     expect(html).toContain('href="https://example.com"');
   });
+
+  it("injects <base> tag when baseDir provided so relative image paths resolve", () => {
+    const html = buildHtml("![pic](./photo.png)", defaults, undefined, "/Users/me/docs");
+    expect(html).toContain('<base href="file:///Users/me/docs/">');
+    expect(html).toContain('src="./photo.png"');
+  });
+
+  it("does not inject <base> tag when baseDir is omitted", () => {
+    const html = buildHtml("test", defaults);
+    expect(html).not.toContain("<base");
+  });
+
+  it("normalizes trailing slash on baseDir", () => {
+    const html = buildHtml("test", defaults, undefined, "/Users/me/docs/");
+    expect(html).toContain('<base href="file:///Users/me/docs/">');
+  });
 });

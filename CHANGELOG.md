@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.9] - 2026-04-26
+
+### Fixed
+
+- **Relative image paths**: images referenced with relative paths (`./photo.png`, `images/foo.jpg`) in Markdown now render correctly in the exported PDF. Previously they were resolved against the temp HTML location instead of the source `.md` directory, causing broken images.
+
 ## [0.2.8] - 2026-04-24
 
 ### Added

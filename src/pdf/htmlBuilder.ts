@@ -32,13 +32,20 @@ const md: MarkdownIt = new MarkdownIt({
   highlight,
 });
 
-export function buildHtml(markdown: string, settings: PdfSettings, customCss?: string): string {
+export function buildHtml(
+  markdown: string,
+  settings: PdfSettings,
+  customCss?: string,
+  baseDir?: string
+): string {
   const body = md.render(stripFrontmatter(markdown));
+  const baseTag = baseDir ? `<base href="file://${baseDir.replace(/\/$/, "")}/">` : "";
 
   return `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
+  ${baseTag}
   <style>
     body { font-size: ${settings.fontSize}px; }
     ${defaultCss}
