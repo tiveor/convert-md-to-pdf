@@ -10,7 +10,7 @@ function stripFrontmatter(markdown: string): string {
 
 function highlight(str: string, lang: string): string {
   if (lang === "mermaid") {
-    return `<pre class="mermaid">${str}</pre>`;
+    return `<pre class="mermaid">${MarkdownIt().utils.escapeHtml(str)}</pre>`;
   }
   if (lang === "excalidraw") {
     return `<pre class="excalidraw">${MarkdownIt().utils.escapeHtml(str)}</pre>`;

@@ -37,7 +37,13 @@ describe("buildHtml", () => {
     const md = "```mermaid\ngraph TD\n  A-->B\n```";
     const html = buildHtml(md, defaults);
     expect(html).toContain('<pre class="mermaid">');
-    expect(html).toContain("A-->B");
+    expect(html).toContain("A--&gt;B");
+  });
+
+  it("escapes HTML labels in mermaid blocks so <br/> survives textContent", () => {
+    const md = '```mermaid\nflowchart LR\n  A["<b>Mark</b><br/>CEO"]\n```';
+    const html = buildHtml(md, defaults);
+    expect(html).toContain("&lt;b&gt;Mark&lt;/b&gt;&lt;br/&gt;CEO");
   });
 
   it("converts excalidraw code blocks to pre.excalidraw", () => {
