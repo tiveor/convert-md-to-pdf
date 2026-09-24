@@ -1,0 +1,71 @@
+name: Release
+
+# Push a tag like v0.3.0 to publish. The tag must match the version in package.json.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Check tag matches package.json
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $VERSION"
+            exit 1
+          fi
+          echo "VSIX=dist/convert-md-to-pdf-$VERSION.vsix" >> "$GITHUB_ENV"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm package
+
+      - name: Extract release notes from CHANGELOG
+        run: |
+          awk -v v="$VERSION" '
+            $0 ~ "^## \\[" v "\\]" { found=1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+          PREV=$(git describe --tags --abbrev=0 "$GITHUB_REF_NAME^" 2>/dev/null || true)
+          if [ -n "$PREV" ]; then
+            printf '\n**Full Changelog**: https://github.com/%s/compare/%s...%s\n' "$GITHUB_REPOSITORY" "$PREV" "$GITHUB_REF_NAME" >> release-notes.md
+          fi
+
+      - name: GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "$VSIX" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "$VSIX" --title "$GITHUB_REF_NAME" --notes-file release-notes.md
+          fi
+
+      - name: Publish to VS Code Marketplace
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          if [ -z "$VSCE_PAT" ]; then echo "::warning::VSCE_PAT secret not set, skipping Marketplace"; exit 0; fi
+          pnpm exec vsce publish --packagePath "$VSIX" --pat "$VSCE_PAT"
+
+      - name: Publish to Open VSX
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: |
+          if [ -z "$OVSX_PAT" ]; then echo "::warning::OVSX_PAT secret not set, skipping Open VSX"; exit 0; fi
+          pnpm exec ovsx publish "$VSIX" --pat "$OVSX_PAT"
