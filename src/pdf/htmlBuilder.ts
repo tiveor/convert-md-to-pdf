@@ -1,36 +1,7 @@
-import MarkdownIt from "markdown-it";
-import hljs from "highlight.js";
-import * as fs from "fs";
 import defaultCss from "../styles/default.css";
 import type { PdfSettings } from "../config/settings";
-
-function stripFrontmatter(markdown: string): string {
-  return markdown.replace(/^---\n[\s\S]*?\n---\n?/, "");
-}
-
-function highlight(str: string, lang: string): string {
-  if (lang === "mermaid") {
-    return `<pre class="mermaid">${MarkdownIt().utils.escapeHtml(str)}</pre>`;
-  }
-  if (lang === "excalidraw") {
-    return `<pre class="excalidraw">${MarkdownIt().utils.escapeHtml(str)}</pre>`;
-  }
-  if (lang && hljs.getLanguage(lang)) {
-    try {
-      return `<pre class="hljs"><code>${hljs.highlight(str, { language: lang }).value}</code></pre>`;
-    } catch {
-      // fall through
-    }
-  }
-  return `<pre class="hljs"><code>${MarkdownIt().utils.escapeHtml(str)}</code></pre>`;
-}
-
-const md: MarkdownIt = new MarkdownIt({
-  html: true,
-  linkify: true,
-  typographer: true,
-  highlight,
-});
+import { renderMarkdown, hasMath } from "../markdown/renderer";
+import { vendorFileUrl } from "../vendor";
 
 export function buildHtml(
   markdown: string,
@@ -38,7 +9,10 @@ export function buildHtml(
   customCss?: string,
   baseDir?: string
 ): string {
-  const body = md.render(stripFrontmatter(markdown));
+  const body = renderMarkdown(markdown);
+  const katexCss = hasMath(body)
+    ? `<link rel="stylesheet" href="${vendorFileUrl("katex/katex.min.css")}">`
+    : "";
   const baseTag = baseDir ? `<base href="file://${baseDir.replace(/\/$/, "")}/">` : "";
 
   return `<!DOCTYPE html>
@@ -46,6 +20,7 @@ export function buildHtml(
 <head>
   <meta charset="UTF-8">
   ${baseTag}
+  ${katexCss}
   <style>
     body { font-size: ${settings.fontSize}px; }
     ${defaultCss}

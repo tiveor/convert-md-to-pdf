@@ -17,7 +17,7 @@ function hasExcalidrawBlocks(markdown: string): boolean {
 async function askOrientation(): Promise<PageOrientation | undefined> {
   const pick = await vscode.window.showQuickPick(
     [
-      { label: "Auto (Recommended)", description: "Wide diagrams get landscape pages, rest stays portrait", value: "auto" as PageOrientation },
+      { label: "Auto (Recommended)", description: "Portrait pages, wide flowcharts redrawn top-to-bottom", value: "auto" as PageOrientation },
       { label: "Portrait", description: "All pages vertical", value: "portrait" as PageOrientation },
       { label: "Landscape", description: "All pages horizontal", value: "landscape" as PageOrientation },
     ],

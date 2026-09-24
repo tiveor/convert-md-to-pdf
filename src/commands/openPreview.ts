@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { PreviewPanel } from "../preview/previewPanel";
 
-export function openPreview(): void {
+export function openPreview(extensionUri: vscode.Uri): void {
   const editor = vscode.window.activeTextEditor;
 
   if (!editor || editor.document.languageId !== "markdown") {
@@ -9,5 +9,5 @@ export function openPreview(): void {
     return;
   }
 
-  PreviewPanel.show(editor.document);
+  PreviewPanel.show(editor.document, extensionUri);
 }

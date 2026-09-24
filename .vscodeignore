@@ -11,4 +11,8 @@ esbuild.mjs
 pnpm-lock.yaml
 PLAN.md
 QUICKSTART.md
-*.map
+**/*.map
+pnpm-workspace.yaml
+vitest.config.ts
+.github/
+**/*.test.ts

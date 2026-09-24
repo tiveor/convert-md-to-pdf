@@ -5,9 +5,7 @@ import * as path from "path";
 import type { PdfSettings } from "../config/settings";
 import { getMermaidConfig } from "../config/mermaidTheme";
 import { findChrome } from "./chromeFinder";
-
-const MERMAID_CDN = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js";
-const EXCALIDRAW_CDN = "https://cdn.jsdelivr.net/npm/@excalidraw/utils@0.1.2/dist/excalidraw-utils.min.js";
+import { vendorPath } from "../vendor";
 
 const PAGE_SIZES: Record<string, { width: number; height: number }> = {
   A4: { width: 8.27, height: 11.69 },
@@ -17,6 +15,10 @@ const PAGE_SIZES: Record<string, { width: number; height: number }> = {
 };
 
 const MIN_READABLE_SCALE = 0.45;
+// Below this fit ratio a left-to-right flowchart's text becomes too small, so it is redrawn top-to-bottom
+const WIDE_FLIP_SCALE = 0.65;
+// A diagram that overflows the current page by less than this shrink factor is pulled back onto it
+const NEAR_FIT_SCALE = 0.8;
 
 function parseMargin(value: string): number {
   const num = parseFloat(value);
@@ -90,21 +92,44 @@ export async function generatePdf(
         });
       });
 
-      await page.addScriptTag({ url: MERMAID_CDN });
-      await page.evaluate(async (cfg: any) => {
-        const m = (window as any).mermaid;
-        m.initialize(cfg);
-        const nodes = Array.from(document.querySelectorAll<HTMLElement>(".mermaid"));
-        for (const node of nodes) {
-          try {
-            // Strip inline style directives so the theme applies uniformly
-            node.textContent = (node.textContent || "").replace(/^\s*style\s+\S+\s+fill:.*$/gm, "");
-            await m.run({ nodes: [node] });
-          } catch {
-            node.innerHTML = `<pre style="color:#c00;font-size:12px;">Mermaid render error</pre>`;
+      await page.addScriptTag({ path: vendorPath("mermaid.min.js") });
+      await page.evaluate(
+        async (cfg: any, keepStyles: boolean, flipWide: boolean, cW: number, minFit: number) => {
+          const m = (window as any).mermaid;
+          m.initialize(cfg);
+          const wideFlowchart = /^(\s*(?:flowchart|graph)\s+)(LR|RL)\b/m;
+          const viewBoxWidth = (svg: string) => {
+            const vb = /viewBox="([^"]+)"/.exec(svg)?.[1].split(/[\s,]+/);
+            return vb ? parseFloat(vb[2]) : 0;
+          };
+          const nodes = Array.from(document.querySelectorAll<HTMLElement>(".mermaid"));
+          for (let i = 0; i < nodes.length; i++) {
+            const node = nodes[i];
+            try {
+              let src = node.textContent || "";
+              // Strip inline style directives so the theme applies uniformly
+              if (!keepStyles) {
+                src = src.replace(/^\s*style\s+\S+\s+fill:.*$/gm, "");
+              }
+              let { svg } = await m.render(`mmd-${i}`, src);
+              if (flipWide && wideFlowchart.test(src)) {
+                const w = viewBoxWidth(svg);
+                if (w > 0 && cW / w < minFit) {
+                  ({ svg } = await m.render(`mmd-${i}-tb`, src.replace(wideFlowchart, "$1TB")));
+                }
+              }
+              node.innerHTML = svg;
+            } catch {
+              node.innerHTML = `<pre style="color:#c00;font-size:12px;">Mermaid render error</pre>`;
+            }
           }
-        }
-      }, { ...getMermaidConfig() });
+        },
+        { ...getMermaidConfig() },
+        settings.keepDiagramStyles,
+        settings.wideDiagrams !== "shrink",
+        contentArea.width,
+        WIDE_FLIP_SCALE
+      );
     }
 
     if (hasExcalidraw) {
@@ -115,7 +140,7 @@ export async function generatePdf(
         });
       });
 
-      await page.addScriptTag({ url: EXCALIDRAW_CDN });
+      await page.addScriptTag({ path: vendorPath("excalidraw-utils.min.js") });
       await page.evaluate(async () => {
         const { exportToSvg } = (window as any).ExcalidrawUtils;
         const nodes = Array.from(document.querySelectorAll<HTMLElement>(".excalidraw"));
@@ -165,7 +190,30 @@ export async function generatePdf(
       });
 
       await page.evaluate(
-        (cW: number, cH: number, minScale: number) => {
+        (cW: number, cH: number, minScale: number, nearFit: number) => {
+          const applyScale = (s: SVGSVGElement, sc: number) => {
+            if (sc < 1) {
+              s.style.transform = `scale(${sc})`;
+              s.style.transformOrigin = "top left";
+            }
+          };
+
+          const shrinkInline = (container: HTMLElement, svg: SVGSVGElement, svgW: number, svgH: number, scale: number) => {
+            applyScale(svg, scale);
+            if (scale < 1) {
+              container.style.width = `${svgW * scale}px`;
+              container.style.height = `${svgH * scale}px`;
+              container.style.overflow = "hidden";
+              container.style.padding = "0";
+              container.style.background = "none";
+              // Center height-limited diagrams horizontally
+              if (svgW * scale < cW * 0.98) {
+                container.style.marginLeft = "auto";
+                container.style.marginRight = "auto";
+              }
+            }
+          };
+
           document.querySelectorAll<HTMLElement>(".mermaid, .excalidraw").forEach((container) => {
             const svg = container.querySelector("svg") as SVGSVGElement | null;
             if (!svg) return;
@@ -225,13 +273,6 @@ export async function generatePdf(
               }
             }
 
-            const applyScale = (s: SVGSVGElement, sc: number) => {
-              if (sc < 1) {
-                s.style.transform = `scale(${sc})`;
-                s.style.transformOrigin = "top left";
-              }
-            };
-
             if (splitPages) {
               const totalH = svgH * scale;
               const headingH = hasHeading ? prev!.getBoundingClientRect().height : 0;
@@ -285,24 +326,69 @@ export async function generatePdf(
 
             } else {
               // Scale inline — let CSS flow handle page breaks naturally
-              applyScale(svg, scale);
-              if (scale < 1) {
-                container.style.width = `${svgW * scale}px`;
-                container.style.height = `${svgH * scale}px`;
-                container.style.overflow = "hidden";
-                container.style.padding = "0";
-                container.style.background = "none";
-                // Center height-limited diagrams horizontally
-                if (svgW * scale < cW * 0.98) {
-                  container.style.marginLeft = "auto";
-                  container.style.marginRight = "auto";
-                }
-              }
+              shrinkInline(container, svg, svgW, svgH, scale);
+              container.dataset.svgW = String(svgW);
+              container.dataset.svgH = String(svgH);
+              container.dataset.scale = String(scale);
             }
           });
+
+          // Simulate pagination to find diagrams that only slightly overflow the space left
+          // on their page. Diagrams can't break, so the browser would push them to the next
+          // page and leave a large blank gap; shrinking them a little keeps them in place.
+          // Positions come from the live layout (margins already collapsed); `shift` adds the
+          // space that forced page moves insert before later content.
+          const isFitDiagram = (el: Element | undefined): el is HTMLElement =>
+            !!el && (el.classList.contains("mermaid") || el.classList.contains("excalidraw")) && !!(el as HTMLElement).dataset.scale;
+          const docTop = (el: Element) => el.getBoundingClientRect().top + window.scrollY;
+          const pushToNextPage = (y: number) => {
+            const into = y % cH;
+            if (into > 0) shift += cH - into;
+          };
+
+          let shift = 0;
+          const children = Array.from(document.body.children) as HTMLElement[];
+          for (let i = 0; i < children.length; i++) {
+            const el = children[i];
+            if (el.classList.contains("split-cont")) {
+              pushToNextPage(docTop(el) + shift);
+              continue;
+            }
+            if (el.classList.contains("page-break")) {
+              pushToNextPage(el.getBoundingClientRect().bottom + window.scrollY + shift);
+              continue;
+            }
+
+            // Headings stay with the diagram that follows them (break-after: avoid)
+            let unitStart: HTMLElement | null = null;
+            let diagram: HTMLElement | null = null;
+            if (/^H[1-6]$/.test(el.tagName) && isFitDiagram(children[i + 1])) {
+              unitStart = el;
+              diagram = children[++i];
+            } else if (isFitDiagram(el)) {
+              unitStart = el;
+              diagram = el;
+            }
+            if (!unitStart || !diagram) continue;
+
+            const unitTop = docTop(unitStart) + shift;
+            const box = diagram.getBoundingClientRect();
+            const unitH = box.bottom + window.scrollY + shift - unitTop;
+            const into = unitTop % cH;
+            if (into + unitH <= cH || unitH > cH) continue;
+
+            const svg = diagram.querySelector("svg") as SVGSVGElement | null;
+            const scale = parseFloat(diagram.dataset.scale!);
+            const factor = (cH - into - (unitH - box.height) - 4) / box.height;
+            if (into > 0 && svg && factor >= nearFit && scale * factor >= minScale) {
+              shrinkInline(diagram, svg, parseFloat(diagram.dataset.svgW!), parseFloat(diagram.dataset.svgH!), scale * factor);
+            } else {
+              pushToNextPage(unitTop);
+            }
+          }
         },
         contentArea.width, contentArea.height,
-        MIN_READABLE_SCALE
+        MIN_READABLE_SCALE, NEAR_FIT_SCALE
       );
     }
 
@@ -310,6 +396,9 @@ export async function generatePdf(
       path: outputPath,
       preferCSSPageSize: true,
       printBackground: true,
+      // Heading bookmarks in the PDF sidebar
+      outline: true,
+      tagged: true,
       displayHeaderFooter: !!(settings.headerTemplate || settings.footerTemplate),
       headerTemplate: settings.headerTemplate || "<span></span>",
       footerTemplate: settings.footerTemplate || "<span></span>",

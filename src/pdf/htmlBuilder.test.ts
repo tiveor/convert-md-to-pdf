@@ -12,12 +12,14 @@ const defaults: PdfSettings = {
   headerTemplate: "",
   footerTemplate: "",
   diagramTheme: "ocean",
+  keepDiagramStyles: false,
+  wideDiagrams: "flip",
 };
 
 describe("buildHtml", () => {
   it("renders basic markdown to HTML", () => {
     const html = buildHtml("# Hello World", defaults);
-    expect(html).toContain("<h1>Hello World</h1>");
+    expect(html).toContain('<h1 id="hello-world">Hello World</h1>');
     expect(html).toContain("<!DOCTYPE html>");
   });
 
@@ -30,7 +32,7 @@ describe("buildHtml", () => {
     const md = "---\ntitle: Test\nmarp: true\n---\n# Content";
     const html = buildHtml(md, defaults);
     expect(html).not.toContain("title: Test");
-    expect(html).toContain("<h1>Content</h1>");
+    expect(html).toContain('<h1 id="content">Content</h1>');
   });
 
   it("converts mermaid code blocks to pre.mermaid", () => {
@@ -105,5 +107,10 @@ describe("buildHtml", () => {
   it("normalizes trailing slash on baseDir", () => {
     const html = buildHtml("test", defaults, undefined, "/Users/me/docs/");
     expect(html).toContain('<base href="file:///Users/me/docs/">');
+  });
+
+  it("links the KaTeX stylesheet only when the document has math", () => {
+    expect(buildHtml("Euler: $e^{i\\pi}+1=0$", defaults)).toContain("katex.min.css");
+    expect(buildHtml("Costs $5 and $10", defaults)).not.toContain("katex.min.css");
   });
 });

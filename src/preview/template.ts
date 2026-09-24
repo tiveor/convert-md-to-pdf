@@ -1,17 +1,31 @@
 import type * as vscode from "vscode";
 import { getMermaidConfig } from "../config/mermaidTheme";
 
+/** Webview URIs of the bundled renderers in dist/vendor */
+export interface PreviewAssets {
+  mermaidJs: string;
+  excalidrawJs: string;
+  katexCss: string;
+}
+
 export function getPreviewHtml(
   bodyHtml: string,
   cspSource: string,
-  nonce: string
+  nonce: string,
+  assets: PreviewAssets,
+  keepDiagramStyles: boolean
 ): string {
+  const hasMermaid = bodyHtml.includes('class="mermaid"');
+  const hasExcalidraw = bodyHtml.includes('class="excalidraw"');
+  const hasMath = bodyHtml.includes('class="katex');
+
   return `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${cspSource} 'nonce-${nonce}' 'unsafe-inline'; script-src 'nonce-${nonce}' https://cdn.jsdelivr.net; img-src ${cspSource} https: data:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}'; font-src ${cspSource}; img-src ${cspSource} https: data:;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  ${hasMath ? `<link rel="stylesheet" href="${assets.katexCss}">` : ""}
   <style nonce="${nonce}">
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -52,28 +66,34 @@ export function getPreviewHtml(
     img { max-width: 100%; height: auto; }
     hr { border: none; border-top: 2px solid var(--vscode-panel-border); margin: 2em 0; }
     .mermaid svg, .excalidraw svg { max-width: 100%; height: auto; }
+    .page-break { border-top: 1px dashed var(--vscode-panel-border); margin: 2em 0; }
+    .table-of-contents ul { list-style: none; padding-left: 1.2em; }
+    .table-of-contents > ul { padding-left: 0; }
+    .katex-display { overflow-x: auto; overflow-y: hidden; }
   </style>
 </head>
 <body>
   ${bodyHtml}
-  <script nonce="${nonce}" type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-    mermaid.initialize(${JSON.stringify(getMermaidConfig())});
-    const nodes = document.querySelectorAll('.mermaid');
-    for (const node of nodes) {
-      try {
-        node.textContent = (node.textContent || '').replace(/^\\s*style\\s+\\S+\\s+fill:.*$/gm, '');
-        await mermaid.run({ nodes: [node] });
-      } catch (e) {
-        node.innerHTML = '<pre style="color:#c00;font-size:12px;">Mermaid render error: ' + e.message + '</pre>';
+  ${hasMermaid ? `<script nonce="${nonce}" src="${assets.mermaidJs}"></script>
+  <script nonce="${nonce}">
+    (async () => {
+      const mermaid = window.mermaid;
+      mermaid.initialize(${JSON.stringify(getMermaidConfig())});
+      for (const node of document.querySelectorAll('.mermaid')) {
+        try {
+          ${keepDiagramStyles ? "" : "node.textContent = (node.textContent || '').replace(/^\\s*style\\s+\\S+\\s+fill:.*$/gm, '');"}
+          await mermaid.run({ nodes: [node] });
+        } catch (e) {
+          node.innerHTML = '<pre style="color:#c00;font-size:12px;">Mermaid render error: ' + e.message + '</pre>';
+        }
       }
-    }
-  </script>
-  <script nonce="${nonce}" type="module">
-    const excalidrawNodes = document.querySelectorAll('.excalidraw');
-    if (excalidrawNodes.length > 0) {
-      const { exportToSvg } = await import('https://cdn.jsdelivr.net/npm/@excalidraw/utils@0.1.2/+esm');
-      for (const node of excalidrawNodes) {
+    })();
+  </script>` : ""}
+  ${hasExcalidraw ? `<script nonce="${nonce}" src="${assets.excalidrawJs}"></script>
+  <script nonce="${nonce}">
+    (async () => {
+      const { exportToSvg } = window.ExcalidrawUtils;
+      for (const node of document.querySelectorAll('.excalidraw')) {
         try {
           const json = JSON.parse(node.textContent || '{}');
           const svg = await exportToSvg({
@@ -92,8 +112,8 @@ export function getPreviewHtml(
           node.innerHTML = '<pre style="color:#c00;font-size:12px;">Excalidraw render error: ' + e.message + '</pre>';
         }
       }
-    }
-  </script>
+    })();
+  </script>` : ""}
 </body>
 </html>`;
 }

@@ -7,6 +7,7 @@ import puppeteer from "puppeteer-core";
 import { findChrome } from "../pdf/chromeFinder";
 import { getSettings } from "../config/settings";
 import { getMermaidConfig } from "../config/mermaidTheme";
+import { vendorPath } from "../vendor";
 
 export function hasMarpFrontMatter(markdown: string): boolean {
   const match = markdown.match(/^---\r?\n([\s\S]*?)\r?\n---/);
@@ -35,9 +36,6 @@ function buildPresentationHtml(markdown: string, baseDirUrl: string): string {
 <body>${html}</body>
 </html>`;
 }
-
-const MERMAID_CDN = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js";
-const EXCALIDRAW_CDN = "https://cdn.jsdelivr.net/npm/@excalidraw/utils@0.1.2/dist/excalidraw-utils.min.js";
 
 async function generatePresentationPdf(markdown: string, outputPath: string, mdDir: string): Promise<void> {
   const settings = getSettings();
@@ -83,20 +81,22 @@ async function generatePresentationPdf(markdown: string, outputPath: string, mdD
         });
       });
 
-      await page.addScriptTag({ url: MERMAID_CDN });
-      await page.evaluate(async (cfg: any) => {
+      await page.addScriptTag({ path: vendorPath("mermaid.min.js") });
+      await page.evaluate(async (cfg: any, keepStyles: boolean) => {
         const m = (window as any).mermaid;
         m.initialize(cfg);
         const nodes = Array.from(document.querySelectorAll<HTMLElement>(".mermaid"));
         for (const node of nodes) {
           try {
-            node.textContent = (node.textContent || "").replace(/^\s*style\s+\S+\s+fill:.*$/gm, "");
+            if (!keepStyles) {
+              node.textContent = (node.textContent || "").replace(/^\s*style\s+\S+\s+fill:.*$/gm, "");
+            }
             await m.run({ nodes: [node] });
           } catch {
             node.innerHTML = `<pre style="color:#c00;font-size:12px;">Mermaid render error</pre>`;
           }
         }
-      }, { ...getMermaidConfig() });
+      }, { ...getMermaidConfig() }, settings.keepDiagramStyles);
     }
 
     if (hasExcalidraw) {
@@ -112,7 +112,7 @@ async function generatePresentationPdf(markdown: string, outputPath: string, mdD
         });
       });
 
-      await page.addScriptTag({ url: EXCALIDRAW_CDN });
+      await page.addScriptTag({ path: vendorPath("excalidraw-utils.min.js") });
       await page.evaluate(async () => {
         const { exportToSvg } = (window as any).ExcalidrawUtils;
         const nodes = Array.from(document.querySelectorAll<HTMLElement>(".excalidraw"));

@@ -16,6 +16,8 @@ describe("getSettings", () => {
     expect(s.customCssPath).toBe("");
     expect(s.headerTemplate).toBe("");
     expect(s.diagramTheme).toBe("ocean");
+    expect(s.keepDiagramStyles).toBe(false);
+    expect(s.wideDiagrams).toBe("flip");
     expect(s.margins).toEqual({
       top: "20mm",
       bottom: "20mm",

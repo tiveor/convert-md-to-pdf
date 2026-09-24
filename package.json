@@ -2,7 +2,7 @@
   "name": "convert-md-to-pdf",
   "displayName": "Convert Markdown to PDF",
   "description": "Export Markdown files to PDF with custom styling and live preview",
-  "version": "0.2.10",
+  "version": "0.3.0",
   "publisher": "alvarotech",
   "icon": "media/icon.png",
   "license": "MIT",
@@ -22,7 +22,11 @@
     "pdf",
     "export",
     "convert",
-    "preview"
+    "preview",
+    "mermaid",
+    "katex",
+    "math",
+    "diagrams"
   ],
   "activationEvents": [
     "onLanguage:markdown"
@@ -165,11 +169,11 @@
             "landscape"
           ],
           "enumDescriptions": [
-            "Auto-detect: wide diagrams get landscape pages, rest stays portrait",
+            "Portrait pages; wide flowcharts are handled by the 'wideDiagrams' setting",
             "All pages in portrait (vertical) orientation",
             "All pages in landscape (horizontal) orientation"
           ],
-          "description": "Page orientation for PDF export. 'auto' mixes portrait and landscape per diagram width."
+          "description": "Page orientation for PDF export."
         },
         "convertMdToPdf.diagramTheme": {
           "type": "string",
@@ -189,6 +193,24 @@
             "Orange/amber tones — warm and energetic"
           ],
           "description": "Color theme for Mermaid diagrams (flowcharts, sequence diagrams, etc.)"
+        },
+        "convertMdToPdf.keepDiagramStyles": {
+          "type": "boolean",
+          "default": false,
+          "description": "Keep inline Mermaid `style X fill:...` directives. When off, they are removed so the diagram theme applies uniformly."
+        },
+        "convertMdToPdf.wideDiagrams": {
+          "type": "string",
+          "default": "flip",
+          "enum": [
+            "flip",
+            "shrink"
+          ],
+          "enumDescriptions": [
+            "Left-to-right flowcharts too wide to read at page width are redrawn top-to-bottom",
+            "Always keep the author's direction and shrink the diagram to fit"
+          ],
+          "description": "How to handle Mermaid flowcharts that are too wide for the page in the PDF export."
         },
         "convertMdToPdf.headerTemplate": {
           "type": "string",
@@ -213,23 +235,24 @@
   },
   "dependencies": {
     "@marp-team/marp-core": "^4.3.0",
+    "@vscode/markdown-it-katex": "^1.1.2",
     "highlight.js": "^11.9.0",
+    "katex": "^0.18.7",
     "markdown-it": "^14.1.0",
+    "markdown-it-anchor": "^10.0.0",
+    "markdown-it-toc-done-right": "^4.2.0",
     "puppeteer-core": "^22.6.0"
   },
   "devDependencies": {
+    "@excalidraw/utils": "0.1.2",
     "@types/markdown-it": "^14.1.1",
     "@types/vscode": "^1.85.0",
     "@vscode/vsce": "^2.24.0",
     "esbuild": "^0.20.2",
+    "mermaid": "^11.17.2",
+    "ovsx": "^1.2.0",
     "typescript": "^5.4.0",
     "vitest": "^4.1.3"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "@vscode/vsce-sign",
-      "keytar"
-    ]
-  }
+  "packageManager": "pnpm@12.4.1"
 }

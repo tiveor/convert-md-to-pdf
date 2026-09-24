@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import type { MermaidThemeName } from "./mermaidTheme";
 
 export type PageOrientation = "auto" | "portrait" | "landscape";
+export type WideDiagramMode = "flip" | "shrink";
 
 export interface PdfSettings {
   chromePath: string;
@@ -18,6 +19,8 @@ export interface PdfSettings {
   headerTemplate: string;
   footerTemplate: string;
   diagramTheme: MermaidThemeName;
+  keepDiagramStyles: boolean;
+  wideDiagrams: WideDiagramMode;
 }
 
 export function getSettings(): PdfSettings {
@@ -41,5 +44,7 @@ export function getSettings(): PdfSettings {
       '<div style="font-size:10px;text-align:center;width:100%"><span class="pageNumber"></span> / <span class="totalPages"></span></div>'
     ),
     diagramTheme: config.get<MermaidThemeName>("diagramTheme", "ocean"),
+    keepDiagramStyles: config.get<boolean>("keepDiagramStyles", false),
+    wideDiagrams: config.get<WideDiagramMode>("wideDiagrams", "flip"),
   };
 }
