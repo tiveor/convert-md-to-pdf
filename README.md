@@ -26,10 +26,15 @@ A VS Code extension that turns Markdown into polished, print-ready PDFs using Ch
 
 - **Export to PDF** — Convert any `.md` file via command palette, editor title bar, or right-click menu (editor and file explorer)
 - **Live Preview** — Side-by-side preview panel that re-renders as you type
-- **Mermaid Diagrams** — Flowcharts, sequence diagrams, class diagrams, and all Mermaid types rendered via CDN (v11)
+- **Mermaid Diagrams** — Flowcharts, sequence diagrams, class diagrams, and all Mermaid types (v11, bundled — works offline). HTML labels like `<br/>` and `<b>` are supported
+- **Readable Wide Diagrams** — Left-to-right flowcharts too wide for the page are redrawn top-to-bottom; diagrams that barely overflow a page are shrunk slightly instead of leaving a blank gap
+- **Math** — KaTeX formulas: inline `$E = mc^2$`, display `$$...$$`, and ` ```math ` blocks. Currency like `$5 or $10` is left alone
+- **Table of Contents** — Put `[[toc]]` anywhere to insert a linked table of contents (levels 1–3)
+- **Internal Links & PDF Bookmarks** — Headings get GitHub-style ids so `[link](#my-heading)` works in the PDF, and the PDF sidebar gets a bookmark per heading
+- **Page Breaks** — Force a new page with `<!-- pagebreak -->`
 - **Excalidraw Sketches** — Hand-drawn style SVGs from ` ```excalidraw ` JSON blocks
 - **Marp Presentations** — Auto-detects `marp: true` front matter and prompts to export as a slide deck PDF (1280x720 per slide) or a regular document PDF
-- **Diagram Themes** — 5 built-in color themes for Mermaid diagrams; inline `style` directives are stripped so the theme always applies uniformly
+- **Diagram Themes** — 5 built-in color themes for Mermaid diagrams; inline `style` directives are stripped so the theme applies uniformly (set `keepDiagramStyles` to keep them)
 - **Page Orientation Picker** — When diagrams are detected, prompts to choose Auto, Portrait, or Landscape
 - **Syntax Highlighting** — Code blocks highlighted with highlight.js using a GitHub-inspired theme
 - **Custom CSS** — Apply your own stylesheet (absolute path or relative to workspace root)
@@ -81,20 +86,22 @@ All settings are under the `convertMdToPdf.*` namespace.
 | `margins` | `{ top: 20mm, bottom: 20mm, left: 15mm, right: 15mm }` | Page margins (supports `mm`, `cm`, `in`, or `px`) |
 | `fontSize` | `14` | Base font size in pixels |
 | `diagramTheme` | `ocean` | Mermaid diagram theme: `ocean`, `forest`, `rose`, `slate`, `sunset` |
+| `keepDiagramStyles` | `false` | Keep inline Mermaid `style X fill:...` directives instead of applying the theme uniformly |
+| `wideDiagrams` | `flip` | `flip`: redraw too-wide left-to-right flowcharts top-to-bottom. `shrink`: keep the direction and shrink to fit |
 | `customCssPath` | — | Path to a custom CSS file (absolute, or relative to workspace root) |
 | `headerTemplate` | — | HTML template for page headers ([Puppeteer classes](https://pptr.dev/api/puppeteer.pdfoptions#headertemplate)) |
 | `footerTemplate` | Page numbers | HTML template for page footers. Default: `<span class="pageNumber"></span> / <span class="totalPages"></span>` |
 
 ## How It Works
 
-1. Markdown is parsed with [markdown-it](https://github.com/markdown-it/markdown-it) (HTML, linkify, typographer enabled)
+1. Markdown is parsed with [markdown-it](https://github.com/markdown-it/markdown-it) (HTML, linkify, typographer enabled), plus [KaTeX](https://katex.org/) math, heading anchors and `[[toc]]`
 2. YAML front matter is stripped before rendering
 3. Code blocks are syntax-highlighted with [highlight.js](https://highlightjs.org/)
 4. ` ```mermaid ` and ` ```excalidraw ` blocks are converted to renderable containers
 5. The HTML is loaded in a headless Chrome instance via [Puppeteer](https://pptr.dev/)
-6. Mermaid (v11 CDN) and Excalidraw render diagrams client-side in the browser
-7. Diagrams are auto-scaled to fit the page — large diagrams are split across pages when needed
-8. Chrome prints to PDF with the configured page size, margins, and orientation
+6. Mermaid and Excalidraw (bundled with the extension, no network needed) render diagrams in the browser
+7. Diagrams are auto-scaled to fit the page — wide flowcharts are redrawn vertically, near-fits are shrunk to avoid blank gaps, and very tall diagrams are split across pages
+8. Chrome prints to PDF with the configured page size, margins, and orientation, including a bookmark outline
 
 ## Requirements
 

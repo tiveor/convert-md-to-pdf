@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.3.0] - 2026-09-24
+
+### Added
+
+- **Math**: KaTeX formulas — inline `$...$`, display `$$...$$` and ` ```math ` blocks, in the PDF export and the preview
+- **Table of contents**: `[[toc]]` inserts a linked table of contents for heading levels 1–3
+- **Internal links**: headings get GitHub-style ids, so `[link](#my-heading)` jumps to the heading in the PDF
+- **PDF bookmarks**: exported PDFs include a heading outline in the viewer sidebar, and are tagged for accessibility
+- **Page breaks**: `<!-- pagebreak -->` forces a new page
+- **`wideDiagrams` setting** (default `flip`): left-to-right flowcharts too wide to read at page width are redrawn top-to-bottom
+- **`keepDiagramStyles` setting**: keep inline Mermaid `style` directives instead of stripping them for the theme
+- CI and tag-driven release workflow: pushing a `v*` tag creates the GitHub release and publishes to the VS Code Marketplace and [Open VSX](https://open-vsx.org/) (for Cursor, Windsurf and VSCodium)
+
+### Changed
+
+- **Works offline**: Mermaid, Excalidraw and KaTeX are bundled with the extension instead of loaded from a CDN
+- A diagram that slightly overflows the space left on a page is shrunk to stay there, instead of jumping to the next page and leaving a blank gap
+- Preview and PDF export share the same Markdown renderer
+- Orientation "Auto" is now described accurately: it uses portrait pages
+
+### Fixed
+
+- Preview: inline styles used by Mermaid and KaTeX were blocked by the webview Content Security Policy
+- Front matter with Windows (CRLF) line endings was not stripped
+- The packaged extension no longer ships an 8 MB source map
+- `pnpm package` failed on pnpm 10+ because dependency build scripts were not approved
+
 ## [0.2.10] - 2026-09-23
 
 ### Fixed
