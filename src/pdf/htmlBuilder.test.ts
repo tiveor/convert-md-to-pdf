@@ -114,3 +114,19 @@ describe("buildHtml", () => {
     expect(buildHtml("Costs $5 and $10", defaults)).not.toContain("katex.min.css");
   });
 });
+
+describe("code block wrapping", () => {
+  it("wraps long lines inside code blocks so they are not clipped on the printed page", () => {
+    const md = "```\nrabbet://regen/callback?partner_user_ref=rbt_u_48213&nonce=b41e9c07d2a1&status=linked&linked_at=2026-09-28T22:05:41.000Z&signature=<hex>\n```";
+    const html = buildHtml(md, defaults);
+    const preRule = html.match(/\bpre\s*\{[^}]*\}/)?.[0] ?? "";
+    expect(preRule).toMatch(/white-space:\s*pre-wrap/);
+    expect(preRule).toMatch(/overflow-wrap:\s*anywhere/);
+  });
+
+  it("lets long inline code tokens break instead of overflowing table cells", () => {
+    const html = buildHtml("`a_very_long_token`", defaults);
+    const codeRule = html.match(/\ncode\s*\{[^}]*\}/)?.[0] ?? "";
+    expect(codeRule).toMatch(/overflow-wrap:\s*break-word/);
+  });
+});

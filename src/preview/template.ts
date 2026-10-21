@@ -51,7 +51,9 @@ export function getPreviewHtml(
       background-color: var(--vscode-textCodeBlock-background);
       border-radius: 6px;
       padding: 16px;
-      overflow-x: auto;
+      /* Match the PDF: long lines wrap instead of scrolling */
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
     }
     pre code { background: none; padding: 0; }
     blockquote {

@@ -55,13 +55,17 @@ code {
   background-color: #f6f8fa;
   padding: 0.2em 0.4em;
   border-radius: 3px;
+  /* Long tokens (URLs, ids) break only when they would overflow; unlike `anywhere`, this keeps table columns at their natural width */
+  overflow-wrap: break-word;
 }
 
+/* A printed page cannot scroll, so long lines wrap at the page width instead of being clipped */
 pre {
   background-color: #f6f8fa;
   border-radius: 6px;
   padding: 16px;
-  overflow-x: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   line-height: 1.45;
 }
 
