@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import * as os from "os";
 import * as fs from "fs";
 import { Marp } from "@marp-team/marp-core";
 import puppeteer from "puppeteer-core";
-import { findChrome } from "../pdf/chromeFinder";
+import { findChrome, chromeLaunchArgs } from "../pdf/chromeFinder";
+import { writeTempHtml, removeTempHtml } from "../pdf/tempHtml";
 import { getSettings } from "../config/settings";
 import { getMermaidConfig } from "../config/mermaidTheme";
 import { vendorPath } from "../vendor";
@@ -49,13 +49,12 @@ async function generatePresentationPdf(markdown: string, outputPath: string, mdD
 
   const baseDirUrl = `file://${mdDir}/`;
   const html = buildPresentationHtml(markdown, baseDirUrl);
-  const tmpFile = path.join(os.tmpdir(), `marp-pdf-${Date.now()}.html`);
-  fs.writeFileSync(tmpFile, html);
+  const tmpFile = writeTempHtml("marp-pdf", html);
 
   const browser = await puppeteer.launch({
     executablePath,
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-gpu"],
+    args: chromeLaunchArgs(),
   });
 
   try {
@@ -154,7 +153,7 @@ async function generatePresentationPdf(markdown: string, outputPath: string, mdD
       ]);
     } catch { /* ignore */ }
     if (proc && !proc.killed) { proc.kill("SIGKILL"); }
-    try { fs.unlinkSync(tmpFile); } catch { /* ignore */ }
+    removeTempHtml(tmpFile);
   }
 }
 

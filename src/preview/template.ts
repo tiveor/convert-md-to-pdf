@@ -1,4 +1,4 @@
-import type * as vscode from "vscode";
+import { randomBytes } from "crypto";
 import { getMermaidConfig } from "../config/mermaidTheme";
 
 /** Webview URIs of the bundled renderers in dist/vendor */
@@ -121,10 +121,5 @@ export function getPreviewHtml(
 }
 
 export function getNonce(): string {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let nonce = "";
-  for (let i = 0; i < 32; i++) {
-    nonce += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return nonce;
+  return randomBytes(16).toString("hex");
 }

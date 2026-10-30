@@ -2,7 +2,7 @@
   "name": "convert-md-to-pdf",
   "displayName": "Convert Markdown to PDF",
   "description": "Export Markdown files to PDF with custom styling and live preview",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "publisher": "alvarotech",
   "icon": "media/icon.png",
   "license": "MIT",
@@ -31,6 +31,15 @@
   "activationEvents": [
     "onLanguage:markdown"
   ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "In Restricted Mode the custom CSS file setting from the workspace is ignored.",
+      "restrictedConfigurations": [
+        "convertMdToPdf.customCssPath"
+      ]
+    }
+  },
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
@@ -109,7 +118,8 @@
         "convertMdToPdf.chromePath": {
           "type": "string",
           "default": "",
-          "description": "Path to Chrome/Chromium executable. Leave empty for auto-detection."
+          "description": "Path to Chrome/Chromium executable. Leave empty for auto-detection. For security this can only be set in user settings, not in workspace settings.",
+          "scope": "machine"
         },
         "convertMdToPdf.pageSize": {
           "type": "string",
@@ -234,25 +244,25 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@marp-team/marp-core": "^4.3.0",
+    "@marp-team/marp-core": "^4.4.0",
     "@vscode/markdown-it-katex": "^1.1.2",
-    "highlight.js": "^11.9.0",
-    "katex": "^0.18.7",
-    "markdown-it": "^14.1.0",
+    "highlight.js": "^11.12.0",
+    "katex": "^0.18.11",
+    "markdown-it": "^14.3.3",
     "markdown-it-anchor": "^10.0.0",
     "markdown-it-toc-done-right": "^4.2.0",
-    "puppeteer-core": "^22.6.0"
+    "puppeteer-core": "^24.43.1"
   },
   "devDependencies": {
     "@excalidraw/utils": "0.1.2",
-    "@types/markdown-it": "^14.1.1",
+    "@types/markdown-it": "^14.2.0",
     "@types/vscode": "^1.85.0",
-    "@vscode/vsce": "^2.24.0",
-    "esbuild": "^0.20.2",
+    "@vscode/vsce": "^3.9.2",
+    "esbuild": "^0.28.2",
     "mermaid": "^11.17.2",
-    "ovsx": "^1.2.0",
-    "typescript": "^5.4.0",
-    "vitest": "^4.1.3"
+    "ovsx": "^1.3.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.12"
   },
   "packageManager": "pnpm@12.4.1"
 }

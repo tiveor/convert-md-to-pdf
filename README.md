@@ -80,7 +80,7 @@ All settings are under the `convertMdToPdf.*` namespace.
 
 | Setting | Default | Description |
 |---|---|---|
-| `chromePath` | Auto-detect | Path to Chrome/Chromium executable. Auto-detected on macOS, Windows, and Linux. |
+| `chromePath` | Auto-detect | Path to Chrome/Chromium executable. Auto-detected on macOS, Windows, and Linux. User settings only: for security, workspace settings cannot set it. |
 | `pageSize` | `A4` | Page size: `A4`, `Letter`, `Legal`, `Tabloid` |
 | `orientation` | `auto` | Page orientation: `auto`, `portrait`, `landscape` |
 | `margins` | `{ top: 20mm, bottom: 20mm, left: 15mm, right: 15mm }` | Page margins (supports `mm`, `cm`, `in`, or `px`) |

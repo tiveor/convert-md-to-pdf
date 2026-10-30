@@ -22,7 +22,6 @@ const buildOptions = {
 // Ship diagram and math renderers with the extension so export and preview work offline
 function copyVendor() {
   mkdirSync("dist/vendor/katex/fonts", { recursive: true });
-  cpSync("node_modules/mermaid/dist/mermaid.min.js", "dist/vendor/mermaid.min.js");
   cpSync("node_modules/@excalidraw/utils/dist/excalidraw-utils.min.js", "dist/vendor/excalidraw-utils.min.js");
   cpSync("node_modules/@excalidraw/utils/dist/excalidraw-utils.min.js.LICENSE.txt", "dist/vendor/excalidraw-utils.min.js.LICENSE.txt");
   cpSync("node_modules/katex/dist/katex.min.css", "dist/vendor/katex/katex.min.css");
@@ -32,7 +31,23 @@ function copyVendor() {
   }
 }
 
+// Mermaid's prebuilt mermaid.min.js embeds its own copy of DOMPurify and KaTeX, so security
+// fixes in those (and pnpm overrides) never reach it. Bundle it from source instead.
+async function buildMermaid() {
+  await esbuild.build({
+    stdin: { contents: 'import mermaid from "mermaid"; window.mermaid = mermaid;', resolveDir: process.cwd() },
+    bundle: true,
+    minify: true,
+    format: "iife",
+    platform: "browser",
+    target: "chrome100",
+    outfile: "dist/vendor/mermaid.min.js",
+    logLevel: "warning",
+  });
+}
+
 copyVendor();
+await buildMermaid();
 
 if (isWatch) {
   const ctx = await esbuild.context(buildOptions);

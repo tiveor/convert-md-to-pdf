@@ -1,10 +1,8 @@
 import puppeteer from "puppeteer-core";
-import * as fs from "fs";
-import * as os from "os";
-import * as path from "path";
 import type { PdfSettings } from "../config/settings";
 import { getMermaidConfig } from "../config/mermaidTheme";
-import { findChrome } from "./chromeFinder";
+import { findChrome, chromeLaunchArgs } from "./chromeFinder";
+import { writeTempHtml, removeTempHtml } from "./tempHtml";
 import { vendorPath } from "../vendor";
 
 const PAGE_SIZES: Record<string, { width: number; height: number }> = {
@@ -55,13 +53,12 @@ export async function generatePdf(
     );
   }
 
-  const tmpFile = path.join(os.tmpdir(), `md-pdf-${Date.now()}.html`);
-  fs.writeFileSync(tmpFile, html);
+  const tmpFile = writeTempHtml("md-pdf", html);
 
   const browser = await puppeteer.launch({
     executablePath,
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-gpu"],
+    args: chromeLaunchArgs(),
   });
 
   try {
@@ -412,6 +409,6 @@ export async function generatePdf(
       ]);
     } catch { /* ignore */ }
     if (proc && !proc.killed) { proc.kill("SIGKILL"); }
-    try { fs.unlinkSync(tmpFile); } catch { /* ignore */ }
+    removeTempHtml(tmpFile);
   }
 }

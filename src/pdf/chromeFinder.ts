@@ -151,3 +151,16 @@ export function findChrome(): string | null {
 
   return null;
 }
+
+/**
+ * Chrome flags for headless export. Chrome's sandbox stays on because the rendered
+ * Markdown may come from an untrusted repo; it is only disabled where Chrome cannot
+ * start with it (running as root on Linux, e.g. in containers).
+ */
+export function chromeLaunchArgs(): string[] {
+  const args = ["--disable-gpu"];
+  if (process.platform === "linux" && process.getuid?.() === 0) {
+    args.push("--no-sandbox", "--disable-setuid-sandbox");
+  }
+  return args;
+}

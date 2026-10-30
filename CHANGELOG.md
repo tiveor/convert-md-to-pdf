@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.1] - 2026-10-30
+
+### Security
+
+- **Chrome path can no longer be set by a workspace**: `convertMdToPdf.chromePath` is now a machine-scoped setting, so a repository's `.vscode/settings.json` cannot point it at an arbitrary program that would run on export. Set it in your user settings instead.
+- **Restricted Mode support**: in untrusted workspaces the workspace's `customCssPath` is ignored
+- **Chrome sandbox stays on**: headless Chrome no longer runs with `--no-sandbox` (except as root on Linux, where Chrome requires it), since exported Markdown can contain HTML from untrusted sources
+- Temporary export HTML is written to a private, uniquely named directory instead of a predictable path in the shared temp folder
+- Preview script nonces use a cryptographic random generator
+- Mermaid is now bundled from source, so the DOMPurify and KaTeX it uses get security fixes (the prebuilt `mermaid.min.js` embedded DOMPurify 3.4.12)
+- Updated dependencies to fix known vulnerabilities, including DOMPurify, markdown-it, linkify-it, KaTeX, @xmldom/xmldom and puppeteer-core (22 → 24, with ws, basic-ftp and zod)
+- Build hardening: dependencies published in the last 7 days are not installed (`minimumReleaseAge`), and CI actions are pinned to commit SHAs
+
 ## [0.3.0] - 2026-09-24
 
 ### Added

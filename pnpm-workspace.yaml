@@ -2,3 +2,15 @@ allowBuilds:
   '@vscode/vsce-sign': true
   esbuild: true
   keytar: true
+
+# Supply-chain guard: refuse versions published in the last 7 days (in minutes),
+# so a freshly hijacked release is caught and pulled before it can be installed here
+minimumReleaseAge: 10080
+
+# Force patched versions of vulnerable transitive dependencies (pnpm audit)
+overrides:
+  '@xmldom/xmldom': ^0.9.12
+  katex: ^0.18.11
+  basic-ftp: ^6.2.1
+  zod: ^4.6.6
+  '@azure/msal-node': ^7.1.0

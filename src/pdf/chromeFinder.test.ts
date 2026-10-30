@@ -163,4 +163,22 @@ describe("chromeFinder", () => {
       expect(findChrome()).toBeNull();
     });
   });
+
+  describe("chromeLaunchArgs", () => {
+    it("keeps the Chrome sandbox on for regular users", async () => {
+      setPlatform("darwin");
+      const { chromeLaunchArgs } = await import("./chromeFinder");
+      expect(chromeLaunchArgs()).not.toContain("--no-sandbox");
+    });
+
+    it("disables the sandbox only for root on Linux", async () => {
+      setPlatform("linux");
+      const getuid = vi.spyOn(process, "getuid").mockReturnValue(0);
+      const { chromeLaunchArgs } = await import("./chromeFinder");
+      expect(chromeLaunchArgs()).toContain("--no-sandbox");
+      getuid.mockReturnValue(1000);
+      expect(chromeLaunchArgs()).not.toContain("--no-sandbox");
+      getuid.mockRestore();
+    });
+  });
 });
